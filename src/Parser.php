@@ -23,10 +23,10 @@ class Parser
      * new Parser($content, 3).
      * Creates a parser object and stores all information in local variables
      */
-    public function __construct($content, $level = 3, $isFlat = false)
+    public function __construct($content, $depth = 3, $isFlat = false)
     {
         $this->content = $content;
-        $this->level = $level;
+        $this->level = $depth;
         $this->isFlat = $isFlat;
     }
 

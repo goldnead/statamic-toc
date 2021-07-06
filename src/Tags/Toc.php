@@ -11,9 +11,11 @@ namespace Goldnead\StatamicToc\Tags;
 
 use Statamic\Tags\Tags;
 use Goldnead\StatamicToc\Parser;
+use Statamic\Tags\Concerns;
 
 class Toc extends Tags
 {
+    use Concerns\OutputsItems;
     /**
      * The {{ toc }} tag.
      *
@@ -22,19 +24,20 @@ class Toc extends Tags
     public function index()
     {
         // get the supported header-levels
-        $level = $this->params->int("level") ? $this->params->int("level") : 3;
+        $depth = $this->params->int("depth") ? $this->params->int("depth") : 3;
         // get raw data of the document
         $raw = $this->context->get("article")->raw();
 
         $isFlat = $this->params->bool("is_flat");
         // create parser and generate TOC items
-        $elements = (new Parser($raw, $level, $isFlat))->generateToc();
+        $elements = (new Parser($raw, $depth, $isFlat))->generateToc();
 
-        return $elements;
+        return dd($this->output($elements));
     }
 
     public function count()
     {
+        $this->params->put("is_flat", true);
         return count($this->index());
     }
 }
