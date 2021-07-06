@@ -29,7 +29,7 @@ This addon generates a Table-Of-Contents (ToC) for any Bard-Field in Statamic. J
 Install via composer:
 
 ```bash
-composer require jedamzik/statamic-toc
+composer require goldnead/statamic-toc
 ```
 
 No further Vendor-Publishing or config files are needed.
@@ -57,7 +57,7 @@ Then you get something like this:
 ...
 ```
 
-### 'toc' Tag
+### `toc` Tag
 
 You can use the `toc`-Tag as you would use any recursive tag (like the `nav` Tag) in your Antler-Templates:
 
