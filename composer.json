@@ -1,0 +1,32 @@
+{
+    "name": "goldnead/statamic-toc",
+    "description": "Automatic Table Of Contents Generator for Statamic Bard-Fields.",
+    "type": "statamic-addon",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Goldnead\\StatamicToc\\": "src/"
+        }
+    },
+    "extra": {
+        "statamic": {
+            "name": "Statamic ToC",
+            "description": "Automatic Table Of Contents Generator for Statamic Bard-Fields."
+        },
+        "laravel": {
+            "providers": [
+                "Goldnead\\StatamicToc\\ServiceProvider"
+            ]
+        }
+    },
+    "authors": [
+        {
+            "name": "goldnead",
+            "email": "adrian.goldner@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.3|^8.0",
+        "statamic/cms": "^3.0.23 | ^3.1"
+    }
+}
