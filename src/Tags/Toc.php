@@ -32,7 +32,7 @@ class Toc extends Tags
         // create parser and generate TOC items
         $elements = (new Parser($raw, $depth, $isFlat))->generateToc();
 
-        return dd($this->output($elements));
+        return $this->output($elements);
     }
 
     /**
