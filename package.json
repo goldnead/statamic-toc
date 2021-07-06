@@ -1,0 +1,12 @@
+{
+    "name": "statamic-toc",
+    "version": "1.0.0",
+    "description": "[![Latest Version](https://img.shields.io/github/v/release/goldnead/statamic-toc?style=flat-square)](https://github.com/goldnead/statamic-toc/releases)",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "production": "echo \"No assets yet.\" && exit 1"
+    },
+    "author": "Adrian Goldner",
+    "license": "MIT"
+  }

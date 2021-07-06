@@ -1,3 +1,6 @@
+[![Latest Version](https://img.shields.io/github/v/release/goldnead/statamic-toc?style=flat-square)](https://github.com/goldnead/statamic-toc/releases)
+![Statamic v3](https://img.shields.io/badge/Statamic-3.0+-FF269E)
+
 # Automatic Table Of Contents for Statamic Bard-Fields
 
 This addon generates a Table-Of-Contents (ToC) for any Bard-Field in Statamic. Just like any Antlers-Tag you can use this addon in your templates with some Statamic-Magic Sugar:
@@ -111,3 +114,7 @@ You can control the behaviour with the following tag-parameters:
 | --------- | ------------------------------------------------------------------------------ | --------------- |
 | depth     | Specifies wich heading-depth the list includes                                 | (int) 3         |
 | is_flat   | When true the list will be displayed as a flat array without nested `children` | (boolean) false |
+
+## License
+
+This is commercial software. To use it in production you need to purchase a license at the [Statamic-Marketplace](https://statamic.com/addons).
