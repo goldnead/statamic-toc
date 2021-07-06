@@ -1,5 +1,5 @@
 [![Latest Version](https://img.shields.io/github/v/release/goldnead/statamic-toc?style=flat-square)](https://github.com/goldnead/statamic-toc/releases)
-![Statamic v3](https://img.shields.io/badge/Statamic-3.0+-FF269E)
+![Statamic v3](https://img.shields.io/badge/Statamic-3.1+-FF269E)
 
 # Automatic Table Of Contents for Statamic Bard-Fields
 
