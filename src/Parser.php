@@ -64,16 +64,21 @@ class Parser
                 $this->headings[sizeof($this->headings) - 1]['id'] = sizeof($this->headings);
             });
         }
+
+        // get root & max level info
         $rootLevel = collect($this->headings)->min("level");
         $maxLevel = collect($this->headings)->max("level");
 
+        // get additional info for each heading and specify parent & children relationships
         if (!empty($this->headings)) {
             collect($this->headings)->each(function ($heading, $key) use ($rootLevel, $maxLevel) {
                 if ($heading['level'] == $rootLevel) {
                     $this->headings[$key]['is_root'] = true;
+                    // we need a default value for the nesting function to work properly
                     $this->headings[$key]["parent"] = null;
                 }
 
+                // if the next item in line level is lower, the current item has children
                 if (isset($this->headings[$key + 1]) && $this->headings[$key + 1]['level'] > $heading['level']) {
                     $this->headings[$key]['has_children'] = true;
                 }
@@ -82,6 +87,7 @@ class Parser
                     $this->headings[$key]['is_deepest_children'] = true;
                 }
 
+                // get parent ids for all items that aren't at root level
                 if ($heading['level'] > $rootLevel) {
                     if ($this->headings[$key - 1]['level'] < $heading['level']) {
                         $this->headings[$key]['parent'] = $this->headings[$key - 1]['id'];
@@ -92,9 +98,16 @@ class Parser
                 }
             });
         }
+        // return flat array if flag is true, nest it if not
         return $this->isFlat ? $this->headings : $this->nestHeadings();
     }
 
+    /**
+     * Nests a list of headings using the keys 'id' & 'parent'.
+     *
+     * @param integer $parent
+     * @return null|array
+     */
     public function nestHeadings($parent = 0)
     {
         $headings = [];

@@ -35,6 +35,11 @@ class Toc extends Tags
         return dd($this->output($elements));
     }
 
+    /**
+     * The {{ toc:count }} tag.
+     *
+     * @return integer
+     */
     public function count()
     {
         $this->params->put("is_flat", true);

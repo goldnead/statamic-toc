@@ -20,7 +20,7 @@ class Toc extends Modifier
      * @param array  $context  Contextual values
      * @return mixed
      */
-    public function index($value, $params, $context)
+    public function index($value)
     {
         // initiate parser and let him inject ids into the DOM
         $content = (new Parser($value))->injectIds();
