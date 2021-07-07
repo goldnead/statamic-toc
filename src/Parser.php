@@ -29,6 +29,7 @@ class Parser
         $this->level = $depth;
         $this->isFlat = $isFlat;
         $this->isHtml = is_string($content);
+        $this->slugs = collect($this->slugs);
     }
 
     public function generateToc(): array
@@ -90,8 +91,6 @@ class Parser
         if ($this->isHtml && !$structure) {
             return $this->generateFromHtml();
         }
-
-        //dd($structure ? $structure : $this->content);
 
         // create a collection with the content array
         $raw = !$structure ? collect($this->content) : collect($structure);
@@ -177,7 +176,7 @@ class Parser
                 $headings[$length - 1]['children'] = $children;
             }
         }
-        return empty($headings) ? null : $headings;
+        return empty($headings) ? [] : $headings;
     }
 
     /**
@@ -219,12 +218,13 @@ class Parser
 
         // make sure we don't have any duplicate ids via adding a counter at
         // the end of an id if it already exists.
-        while (in_array($id, $this->slugs)) {
+        while ($this->slugs->contains($id)) {
             $id = $raw . '-' . $count;
             $count++;
         }
 
-        $this->slugs[] = $id;
+        $this->slugs->push($id);
+
         return $id;
     }
 }

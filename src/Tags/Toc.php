@@ -27,7 +27,10 @@ class Toc extends Tags
         $depth = $this->params->int("depth") ? $this->params->int("depth") : 3;
         // get raw data of the document
         $field = $this->params->get("field", "article");
-        $raw = $this->context->get($field)->raw();
+
+        $content = $this->params->get("content");
+
+        $raw = !$content ? $this->context->get($field)->raw() : $content;
 
         $isFlat = $this->params->bool("is_flat");
         // create parser and generate TOC items
