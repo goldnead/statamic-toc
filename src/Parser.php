@@ -28,6 +28,55 @@ class Parser
         $this->content = $content;
         $this->level = $depth;
         $this->isFlat = $isFlat;
+        $this->isHtml = is_string($content);
+    }
+
+    public function generateToc(): array
+    {
+        if ($this->isHtml) {
+            return $this->generateFromHtml();
+        }
+        return $this->generateFromStructure();
+    }
+
+    private function generateFromHtml(): array
+    {
+        $tidy_config = array(
+            "indent"               => true,
+            "output-xml"           => true,
+            "output-xhtml"         => false,
+            "drop-empty-paras"     => false,
+            "hide-comments"        => true,
+            "numeric-entities"     => true,
+            "doctype"              => "omit",
+            "char-encoding"        => "utf8",
+            "repeated-attributes"  => "keep-last"
+        );
+
+        $html = tidy_repair_string($this->content, $tidy_config);
+        $doc = new \DOMDocument();
+        $doc->loadHTML($html);
+
+        $xpath = new \DOMXpath($doc);
+        $htags = $xpath->query('//h1 | //h2 | //h3 | //h4 | //h5 | //h6');
+
+        $headings = collect([]);
+        foreach ($htags as $tag) {
+            $headings->push([
+                "type" => "heading",
+                "attrs" => [
+                    "level" => (int) ltrim($tag->nodeName, 'h')
+                ],
+                "content" => [
+                    [
+                        "type" => "text",
+                        "text" => $tag->nodeValue,
+                    ],
+                ],
+            ]);
+        }
+
+        return $this->generateFromStructure($headings->toArray());
     }
 
     /**
@@ -36,10 +85,16 @@ class Parser
      *
      * @return Array
      */
-    public function generateToc(): array
+    private function generateFromStructure($structure = null): array
     {
+        if ($this->isHtml && !$structure) {
+            return $this->generateFromHtml();
+        }
+
+        //dd($structure ? $structure : $this->content);
+
         // create a collection with the content array
-        $raw = collect($this->content);
+        $raw = !$structure ? collect($this->content) : collect($structure);
 
         // filter out all the headings
         $headings = $raw->filter(function ($item) {
