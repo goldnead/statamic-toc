@@ -13,7 +13,7 @@ This addon generates a Table-Of-Contents (ToC) for any Bard-Field in Statamic. J
       {{ toc depth="3" }}
       <li>
         <a class="font-bold text-cyan-800" href="#{{ toc_id }}"
-          >Customizing your</a
+          >{{ toc_title }}</a
         >
         {{ if children }}
         <ol>
