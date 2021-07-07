@@ -26,7 +26,8 @@ class Toc extends Tags
         // get the supported header-levels
         $depth = $this->params->int("depth") ? $this->params->int("depth") : 3;
         // get raw data of the document
-        $raw = $this->context->get("article")->raw();
+        $field = $this->params->get("field", "article");
+        $raw = $this->context->get($field)->raw();
 
         $isFlat = $this->params->bool("is_flat");
         // create parser and generate TOC items
