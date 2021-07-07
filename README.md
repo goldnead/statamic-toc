@@ -80,6 +80,16 @@ You can use the `toc`-Tag as you would use any recursive tag (like the `nav` Tag
 </ol>
 ```
 
+As default this addon assumes your bard-content lives inside a content-field
+named `article`. To change that behaviour you can assign the name of the field
+bard field with the parameter `field`:
+
+`{{ toc field="bard" }}`
+
+or alternatively you can pass the bard-content directly to the `content` parameter:
+
+`{{ toc :content="bard" }}`
+
 If you don't want to display your ToC as a nested list you can pass the parameter `is_flat`:
 
 ```html
@@ -110,10 +120,12 @@ Every Item has the following variables at your disposal:
 
 You can control the behaviour with the following tag-parameters:
 
-| Parameter | Description                                                                    | (Type) Default  |
-| --------- | ------------------------------------------------------------------------------ | --------------- |
-| depth     | Specifies wich heading-depth the list includes                                 | (int) 3         |
-| is_flat   | When true the list will be displayed as a flat array without nested `children` | (boolean) false |
+| Parameter | Description                                                                    | (Type) Default             |
+| --------- | ------------------------------------------------------------------------------ | -------------------------- |
+| `depth`   | Specifies wich heading-depth the list includes                                 | (int) `3`                  |
+| `is_flat` | When true the list will be displayed as a flat array without nested `children` | (boolean) `false`          |
+| `field`   | The name of the bard-field.                                                    | (string) `"article"`       |
+| content   | Content of the bard-structure or HTML String                                   | (string/array/null) `null` |
 
 ## License
 

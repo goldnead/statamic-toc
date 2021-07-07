@@ -19,15 +19,70 @@ class Parser
 
     private $headings = [];
 
+    public function __construct()
+    {
+        $this->slugs = collect($this->slugs);
+    }
+
     /**
      * new Parser($content, 3).
      * Creates a parser object and stores all information in local variables
      */
-    public function __construct($content, $depth = 3, $isFlat = false)
+    public function make($content, $depth = 3, $isFlat = false)
     {
         $this->content = $content;
         $this->level = $depth;
         $this->isFlat = $isFlat;
+        $this->isHtml = is_string($content);
+        return $this;
+    }
+
+    public function generateToc(): array
+    {
+        if ($this->isHtml) {
+            return $this->generateFromHtml();
+        }
+        return $this->generateFromStructure();
+    }
+
+    private function generateFromHtml(): array
+    {
+        $tidy_config = array(
+            "indent"               => true,
+            "output-xml"           => true,
+            "output-xhtml"         => false,
+            "drop-empty-paras"     => false,
+            "hide-comments"        => true,
+            "numeric-entities"     => true,
+            "doctype"              => "omit",
+            "char-encoding"        => "utf8",
+            "repeated-attributes"  => "keep-last"
+        );
+
+        $html = tidy_repair_string($this->content, $tidy_config);
+        $doc = new \DOMDocument();
+        $doc->loadHTML($html);
+
+        $xpath = new \DOMXpath($doc);
+        $htags = $xpath->query('//h1 | //h2 | //h3 | //h4 | //h5 | //h6');
+
+        $headings = collect([]);
+        foreach ($htags as $tag) {
+            $headings->push([
+                "type" => "heading",
+                "attrs" => [
+                    "level" => (int) ltrim($tag->nodeName, 'h')
+                ],
+                "content" => [
+                    [
+                        "type" => "text",
+                        "text" => $tag->nodeValue,
+                    ],
+                ],
+            ]);
+        }
+
+        return $this->generateFromStructure($headings->toArray());
     }
 
     /**
@@ -36,10 +91,14 @@ class Parser
      *
      * @return Array
      */
-    public function generateToc(): array
+    private function generateFromStructure($structure = null): array
     {
+        if ($this->isHtml && !$structure) {
+            return $this->generateFromHtml();
+        }
+
         // create a collection with the content array
-        $raw = collect($this->content);
+        $raw = !$structure ? collect($this->content) : collect($structure);
 
         // filter out all the headings
         $headings = $raw->filter(function ($item) {
@@ -59,7 +118,7 @@ class Parser
                 $this->headings[] = [
                     "toc_title" => $title,
                     "level" => $heading["attrs"]["level"],
-                    "toc_id" => $this->generateId($title),
+                    "toc_id" => $this->generateId($title, true),
                 ];
                 $this->headings[sizeof($this->headings) - 1]['id'] = sizeof($this->headings);
             });
@@ -95,6 +154,15 @@ class Parser
                     if ($this->headings[$key - 1]['level'] === $heading['level']) {
                         $this->headings[$key]['parent'] = $this->headings[$key - 1]['parent'];
                     }
+                    if ($this->headings[$key - 1]['level'] > $heading['level']) {
+                        $i = $key;
+                        while ($i--) {
+                            if ($this->headings[$i]['level'] < $heading['level']) {
+                                $this->headings[$key]['parent'] = $this->headings[$i]['id'];
+                                break;
+                            }
+                        }
+                    }
                 }
             });
         }
@@ -122,14 +190,14 @@ class Parser
                 $headings[$length - 1]['children'] = $children;
             }
         }
-        return empty($headings) ? null : $headings;
+        return empty($headings) ? [] : $headings;
     }
 
     /**
      * Injects header HTML-Elements with their corersponding ids.
      * @return String
      */
-    public function injectIds(): string
+    public function injectIds($value): string
     {
         // Do all the regex magic here
         $injected = preg_replace_callback(
@@ -140,7 +208,7 @@ class Parser
                 $tag = $matches[1];
                 $title = strip_tags($matches[3]);
                 $hasId = preg_match('/id=(["\'])(.*?)\1[\s>]/si', $matches[2], $matchedIds);
-                $id = $hasId ? $matchedIds[2] : $this->generateId($title);
+                $id = $hasId ? $matchedIds[2] : $this->generateId($title, false);
 
                 if ($hasId) {
                     return $matches[0];
@@ -148,7 +216,7 @@ class Parser
                 // rebuild the tag with Id.
                 return sprintf('<%s%s id="%s">%s</%s>', $tag, $matches[2], $id, $matches[3], $tag);
             },
-            $this->content
+            $value
         );
         return $injected;
     }
@@ -157,19 +225,21 @@ class Parser
      * Slugifies a given title
      * @return string        [description]
      */
-    public function generateId($title): string
+    public function generateId($title, $list = false): string
     {
         $id = $raw = Str::slug($title);
         $count = 2;
+        $suffix = $list ? 'list' : 'text';
 
         // make sure we don't have any duplicate ids via adding a counter at
         // the end of an id if it already exists.
-        while (in_array($id, $this->slugs)) {
+        while ($this->slugs->contains($id . '-' . $suffix)) {
             $id = $raw . '-' . $count;
             $count++;
         }
 
-        $this->slugs[] = $id;
+        $this->slugs->push($id . '-' . $suffix);
+
         return $id;
     }
 }

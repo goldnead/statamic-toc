@@ -8,7 +8,7 @@
 namespace Goldnead\StatamicToc\Modifiers;
 
 use Statamic\Modifiers\Modifier;
-use Goldnead\StatamicToc\Parser;
+use Goldnead\StatamicToc\Facades\ParserFacade as Parser;
 
 class Toc extends Modifier
 {
@@ -23,7 +23,7 @@ class Toc extends Modifier
     public function index($value)
     {
         // initiate parser and let him inject ids into the DOM
-        $content = (new Parser($value))->injectIds();
+        $content = Parser::injectIds($value);
         return $content;
     }
 }

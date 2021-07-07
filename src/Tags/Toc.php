@@ -10,7 +10,7 @@
 namespace Goldnead\StatamicToc\Tags;
 
 use Statamic\Tags\Tags;
-use Goldnead\StatamicToc\Parser;
+use Goldnead\StatamicToc\Facades\ParserFacade as Parser;
 use Statamic\Tags\Concerns;
 
 class Toc extends Tags
@@ -26,11 +26,19 @@ class Toc extends Tags
         // get the supported header-levels
         $depth = $this->params->int("depth") ? $this->params->int("depth") : 3;
         // get raw data of the document
-        $raw = $this->context->get("article")->raw();
+        $field = $this->params->get("field", "article");
+
+        $content = $this->params->get("content");
+
+        if (!$content && !$this->params->get($field)) {
+            return [];
+        }
+
+        $raw = !$content ? $this->context->get($field)->raw() : $content;
 
         $isFlat = $this->params->bool("is_flat");
         // create parser and generate TOC items
-        $elements = (new Parser($raw, $depth, $isFlat))->generateToc();
+        $elements = Parser::make($raw, $depth, $isFlat)->generateToc();
 
         return $this->output($elements);
     }
