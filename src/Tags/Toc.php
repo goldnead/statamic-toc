@@ -30,6 +30,10 @@ class Toc extends Tags
 
         $content = $this->params->get("content");
 
+        if (!$content && !$this->params->get($field)) {
+            return [];
+        }
+
         $raw = !$content ? $this->context->get($field)->raw() : $content;
 
         $isFlat = $this->params->bool("is_flat");
