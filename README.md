@@ -106,15 +106,15 @@ If you don't want to display your ToC as a nested list you can pass the paramete
 
 Every Item has the following variables at your disposal:
 
-| Variable            | Description                                                 |
-| ------------------- | ----------------------------------------------------------- |
-| toc_title (string)  | The title of the heading                                    |
-|  toc_id (string)    | The slugified title to use as anchor-id                     |
-| id (int)            |  The internal id used to assign children and parents        |
-|  is_root (bool)     | A flag to determine if the current heading is at root level |
-| parent (int/null)   | Id of parent item if current item is a child                |
-| has_children (bool) |  Flag if current item has children                          |
-|  children (array)   | Contains all the Child-headings                             |
+| Variable              | Description                                                 |
+| --------------------- | ----------------------------------------------------------- |
+| `toc_title` (string)  | The title of the heading                                    |
+| ` toc_id` (string)    | The slugified title to use as anchor-id                     |
+| `id` (int)            |  The internal id used to assign children and parents        |
+| ` is_root` (bool)     | A flag to determine if the current heading is at root level |
+| `parent` (int/null)   | Id of parent item if current item is a child                |
+| `has_children` (bool) |  Flag if current item has children                          |
+| ` children` (array)   | Contains all the Child-headings                             |
 
 ### Parameters
 
@@ -125,7 +125,7 @@ You can control the behaviour with the following tag-parameters:
 | `depth`   | Specifies wich heading-depth the list includes                                 | (int) `3`                  |
 | `is_flat` | When true the list will be displayed as a flat array without nested `children` | (boolean) `false`          |
 | `field`   | The name of the bard-field.                                                    | (string) `"article"`       |
-| content   | Content of the bard-structure or HTML String                                   | (string/array/null) `null` |
+| `content` | Content of the bard-structure or HTML String                                   | (string/array/null) `null` |
 
 ## License
 
