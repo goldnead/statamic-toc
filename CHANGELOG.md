@@ -2,6 +2,11 @@
 
 All notable changes to `statamic-toc` will be documented in this file.
 
+## 2021-07-08 v1.0.4
+
+- Support Level-Start
+- Refactor & document code.
+
 ## 2021-07-08 v1.03
 
 - Fix ToC not displaying in some situations.
