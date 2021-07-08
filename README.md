@@ -41,6 +41,56 @@ No further Vendor-Publishing or config files are needed.
 
 This Addon provides functionality to automatically generate an array of the headings from your bard-field so you can iterate through them in your template. It also ships with a modifier to automatically generate IDs for anchor-links.
 
+### Bard setup
+
+The idea behind this addon is that it should work out of the box with your existing Bard-Setup. Behind the scenes it will parse its
+content for headlines and generates an associative nested (or unnested, see options below) array that you can iterate through.
+So, no special headline-sets are needed, just the plain ol' default Bard-field can be used:
+
+```yaml
+
+title: test
+sections:
+  main:
+    display: Main
+    fields:
+      ...
+      -
+        handle: bard
+        field:
+          always_show_set_button: false
+          buttons:
+            - h2
+            - h3
+            - bold
+            - italic
+            - unorderedlist
+            - orderedlist
+            - removeformat
+            - quote
+            - anchor
+            - image
+            - table
+          toolbar_mode: fixed
+          link_noopener: false
+          link_noreferrer: false
+          target_blank: false
+          reading_time: false
+          fullscreen: true
+          allow_source: true
+          enable_input_rules: true
+          enable_paste_rules: true
+          display: Bard
+          type: bard
+          icon: bard
+          listable: hidden
+
+```
+
+Of course, you can use as many heading-buttons as you like.
+If you prefer to save your bard-content as HTML, you can safely do so. This addon works best with structured bard-data
+but HTML is also supported and works as intended. So you can safely turn on `save_html: true` in your bard-settings.
+
 ### `toc` Modifier
 
 Use the modifier in your templates to add IDs to your headings:
@@ -106,26 +156,26 @@ If you don't want to display your ToC as a nested list you can pass the paramete
 
 Every Item has the following variables at your disposal:
 
-| Variable              | Description                                                 |
-| --------------------- | ----------------------------------------------------------- |
-| `toc_title` (string)  | The title of the heading                                    |
-| ` toc_id` (string)    | The slugified title to use as anchor-id                     |
-| `id` (int)            |  The internal id used to assign children and parents        |
-| ` is_root` (bool)     | A flag to determine if the current heading is at root level |
-| `parent` (int/null)   | Id of parent item if current item is a child                |
-| `has_children` (bool) |  Flag if current item has children                          |
-| ` children` (array)   | Contains all the Child-headings                             |
+| Variable                | Description                                                 |
+| ----------------------- | ----------------------------------------------------------- |
+| `toc_title` _(string)_  | The title of the heading                                    |
+| ` toc_id` _(string)_    | The slugified title to use as anchor-id                     |
+| `id` (int)              |  The internal id used to assign children and parents        |
+| ` is_root` _(bool)_     | A flag to determine if the current heading is at root level |
+| `parent` _(int/null)_   | Id of parent item if current item is a child                |
+| `has_children` _(bool)_ |  Flag if current item has children                          |
+| `children` _(array)_    | Contains all the Child-headings                             |
 
 ### Parameters
 
 You can control the behaviour with the following tag-parameters:
 
-| Parameter | Description                                                                    | (Type) Default             |
-| --------- | ------------------------------------------------------------------------------ | -------------------------- |
-| `depth`   | Specifies wich heading-depth the list includes                                 | (int) `3`                  |
-| `is_flat` | When true the list will be displayed as a flat array without nested `children` | (boolean) `false`          |
-| `field`   | The name of the bard-field.                                                    | (string) `"article"`       |
-| `content` | Content of the bard-structure or HTML String                                   | (string/array/null) `null` |
+| Parameter | Description                                                                    | (Type) Default               |
+| --------- | ------------------------------------------------------------------------------ | ---------------------------- |
+| `depth`   | Specifies wich heading-depth the list includes                                 | _(int)_ `3`                  |
+| `is_flat` | When true the list will be displayed as a flat array without nested `children` | _(boolean)_ `false`          |
+| `field`   | The name of the bard-field.                                                    | _(string)_ `"article"`       |
+| `content` | Content of the bard-structure or HTML String                                   | _(string/array/null)_ `null` |
 
 ## License
 
