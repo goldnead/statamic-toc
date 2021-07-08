@@ -24,13 +24,15 @@ class Toc extends Tags
     public function index()
     {
         // get the supported header-levels
-        $depth = $this->params->int("depth") ? $this->params->int("depth") : 3;
+        $depth = $this->params->int("depth", 3);
+        $start = ($this->params->int('from') && $this->params->int('from') > 0) ? $this->params->int('from') : 1;
         // get raw data of the document
         $field = $this->params->get("field", "article");
 
         $content = $this->params->get("content");
 
         if (!$content && !$this->context->get($field)) {
+            // return an empty array so the $this->count() function works properly
             return [];
         }
 
@@ -38,9 +40,14 @@ class Toc extends Tags
 
         $isFlat = $this->params->bool("is_flat");
         // create parser and generate TOC items
-        $elements = Parser::make($raw, $depth, $isFlat)->generateToc();
+        $toc = Parser::make($raw);
+        $toc->depth($depth)
+            ->from($start)
+            ->flattenIf($isFlat);
 
-        return $this->output($elements);
+        return $this->output(
+            $toc->build()
+        );
     }
 
     /**
@@ -50,6 +57,7 @@ class Toc extends Tags
      */
     public function count()
     {
+        // manually set the 'is_flat' flag, so we can count all elements
         $this->params->put("is_flat", true);
         return count($this->index());
     }
