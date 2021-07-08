@@ -51,7 +51,7 @@ class Parser
     /**
      * Sets the given List-Depth
      *
-     * @param [int] $depth
+     * @param int $depth
      * @return $this
      */
     public function depth($depth)
@@ -63,12 +63,25 @@ class Parser
     /**
      * Sets the strating point from which the list should be displayed.
      *
-     * @param [int] $start
+     * @param string|int $start
      * @return $this
      */
     public function from($start)
     {
+        // parse string if it has the syntax "h(int)" (eg. h2)
+        if (is_string($start)) {
+            $start = intval(ltrim($start, "h"));
+        }
+        // reset starting value if it is below or above the supported ones
+        if ($start < 1) {
+            $start = 1;
+        } elseif ($start > 6) {
+            $start = 6;
+        }
+
         $this->minLevel = $start;
+        // our depth is relative to the minLevel. So we need to update is if
+        // the minLevel changes
         $this->depth($this->maxLevel);
         return $this;
     }

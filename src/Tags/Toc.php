@@ -25,7 +25,7 @@ class Toc extends Tags
     {
         // get the supported header-levels
         $depth = $this->params->int("depth", 3);
-        $start = ($this->params->int('from') && $this->params->int('from') > 0) ? $this->params->int('from') : 1;
+        $start = $this->params->get('from', "h1");
         // get raw data of the document
         $field = $this->params->get("field", "article");
 
