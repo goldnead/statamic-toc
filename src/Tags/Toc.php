@@ -30,7 +30,7 @@ class Toc extends Tags
 
         $content = $this->params->get("content");
 
-        if (!$content && !$this->params->get($field)) {
+        if (!$content && !$this->context->get($field)) {
             return [];
         }
 
