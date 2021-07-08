@@ -176,6 +176,7 @@ You can control the behaviour with the following tag-parameters:
 | `is_flat` | When true the list will be displayed as a flat array without nested `children` | _(boolean)_ `false`          |
 | `field`   | The name of the bard-field.                                                    | _(string)_ `"article"`       |
 | `content` | Content of the bard-structure or HTML String                                   | _(string/array/null)_ `null` |
+| `from`    | The starting point from where the list shohuld be outputted                    | _(string)_ `h1`              |
 
 ## License
 

@@ -15,9 +15,13 @@ class Parser
 
     private $slugs = [];
 
-    private $level;
+    private $maxLevel = 3;
+
+    private $minLevel = 1;
 
     private $headings = [];
+
+    private $isFlat = false;
 
     public function __construct()
     {
@@ -25,28 +29,121 @@ class Parser
     }
 
     /**
-     * new Parser($content, 3).
+     * Parser::make($content).
      * Creates a parser object and stores all information in local variables
      */
-    public function make($content, $depth = 3, $isFlat = false)
+    public function make($content)
     {
         $this->content = $content;
-        $this->level = $depth;
-        $this->isFlat = $isFlat;
-        $this->isHtml = is_string($content);
         return $this;
     }
 
-    public function generateToc(): array
+    /**
+     * Determines if the given content is a bard structure or a HTML-String.
+     *
+     * @return boolean
+     */
+    public function isHTML(): bool
     {
-        if ($this->isHtml) {
+        return is_string($this->content);
+    }
+
+    /**
+     * Sets the given List-Depth
+     *
+     * @param int $depth
+     * @return $this
+     */
+    public function depth($depth)
+    {
+        $this->maxLevel = $depth + $this->minLevel - 1;
+        return $this;
+    }
+
+    /**
+     * Sets the strating point from which the list should be displayed.
+     *
+     * @param string|int $start
+     * @return $this
+     */
+    public function from($start)
+    {
+        // parse string if it has the syntax "h(int)" (eg. h2)
+        if (is_string($start)) {
+            $start = intval(ltrim($start, "h"));
+        }
+        // reset starting value if it is below or above the supported ones
+        if ($start < 1) {
+            $start = 1;
+        } elseif ($start > 6) {
+            $start = 6;
+        }
+
+        $this->minLevel = $start;
+        // our depth is relative to the minLevel. So we need to update is if
+        // the minLevel changes
+        $this->depth($this->maxLevel);
+        return $this;
+    }
+
+    /**
+     * Sets a marker so the list won't be proicessed recursively.
+     *
+     * @return $this
+     */
+    public function flatten()
+    {
+        $this->isFlat = true;
+        return $this;
+    }
+
+    /**
+     * Stops the recursion at the given level.
+     * TODO
+     *
+     * @param [type] $level
+     * @return void
+     */
+    public function flattenFrom($level)
+    {
+    }
+
+    /**
+     * Sets the flattening only if the given parameter is true.
+     *
+     * @param boolean $bool
+     * @return void
+     */
+    public function flattenIf($bool)
+    {
+        if ($bool) {
+            $this->flatten();
+        }
+        return $this;
+    }
+
+    /**
+     * Generates the output array.
+     *
+     * @return array
+     */
+    public function build(): array
+    {
+        if ($this->isHTML()) {
             return $this->generateFromHtml();
         }
         return $this->generateFromStructure();
     }
 
+    /**
+     * Parses a HTML-input and returns a fake bard-structure to be processed
+     * by $this->generateFromStructure().
+     *
+     * @return array
+     */
     private function generateFromHtml(): array
     {
+        // tidy up & load our DOM.
         $tidy_config = array(
             "indent"               => true,
             "output-xml"           => true,
@@ -58,15 +155,18 @@ class Parser
             "char-encoding"        => "utf8",
             "repeated-attributes"  => "keep-last"
         );
-
         $html = tidy_repair_string($this->content, $tidy_config);
         $doc = new \DOMDocument();
         $doc->loadHTML($html);
 
+        // create an xPath Query to get all headings in order.
         $xpath = new \DOMXpath($doc);
         $htags = $xpath->query('//h1 | //h2 | //h3 | //h4 | //h5 | //h6');
 
+        // empty container collection or our headings
         $headings = collect([]);
+        // iterage over each tag and set an object similar to the one used by bard
+        // which can be parsed by $this->generateFromStructure();
         foreach ($htags as $tag) {
             $headings->push([
                 "type" => "heading",
@@ -93,16 +193,12 @@ class Parser
      */
     private function generateFromStructure($structure = null): array
     {
-        if ($this->isHtml && !$structure) {
-            return $this->generateFromHtml();
-        }
-
         // create a collection with the content array
         $raw = !$structure ? collect($this->content) : collect($structure);
 
         // filter out all the headings
         $headings = $raw->filter(function ($item) {
-            return $item["type"] === "heading" && $item["attrs"]["level"] <= $this->level;
+            return $item["type"] === "heading" && $item["attrs"]["level"] >= $this->minLevel && $item["attrs"]["level"] <= $this->maxLevel;
         });
 
         if ($headings->count() > 0) {
@@ -171,12 +267,12 @@ class Parser
     }
 
     /**
-     * Nests a list of headings using the keys 'id' & 'parent'.
+     * Recursive function to nest a list of headings using the keys 'id' & 'parent'.
      *
      * @param integer $parent
      * @return null|array
      */
-    public function nestHeadings($parent = 0)
+    private function nestHeadings($parent = 0)
     {
         $headings = [];
         foreach ($this->headings as $key => $heading) {
@@ -201,7 +297,7 @@ class Parser
     {
         // Do all the regex magic here
         $injected = preg_replace_callback(
-            '#<(h[1-' . $this->level . '])(.*?)>(.*?)</\1>#si',
+            '#<(h[1-' . $this->maxLevel . '])(.*?)>(.*?)</\1>#si',
             // callback
             function ($matches) {
                 // the html tag
@@ -225,7 +321,7 @@ class Parser
      * Slugifies a given title
      * @return string        [description]
      */
-    public function generateId($title, $list = false): string
+    private function generateId($title, $list = false): string
     {
         $id = $raw = Str::slug($title);
         $count = 2;
