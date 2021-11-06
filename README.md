@@ -126,7 +126,7 @@ You can use the `toc`-Tag as you would use any recursive tag (like the `nav` Tag
     </ol>
     {{ /if }}
   </li>
-  {{ /toc }}
+  {{ /toc }}
 </ol>
 ```
 
@@ -148,7 +148,7 @@ If you don't want to display your ToC as a nested list you can pass the paramete
   <li>
     <a href="#{{ toc_id }}">{{ toc_title }}</a>
   </li>
-  {{ /toc }}
+  {{ /toc }}
 </ol>
 ```
 
@@ -160,11 +160,20 @@ Every Item has the following variables at your disposal:
 | ----------------------- | ----------------------------------------------------------- |
 | `toc_title` _(string)_  | The title of the heading                                    |
 | ` toc_id` _(string)_    | The slugified title to use as anchor-id                     |
-| `id` (int)              |  The internal id used to assign children and parents        |
+| `id` (int)              |  The internal id used to assign children and parents        |
 | ` is_root` _(bool)_     | A flag to determine if the current heading is at root level |
 | `parent` _(int/null)_   | Id of parent item if current item is a child                |
-| `has_children` _(bool)_ |  Flag if current item has children                          |
+| `has_children` _(bool)_ |  Flag if current item has children                          |
 | `children` _(array)_    | Contains all the Child-headings                             |
+| `total_children` _(int)_| Number of children (only if `has_children` is true)         |
+
+Also, there are the following global variables present inside the `toc` tag:
+
+| Variable                | Description                                      |
+| ----------------------- | ------------------------------------------------ |
+| `total_results` _(int)_ | The number of total headings including children. |
+| `no_results` _(bool)_   | True if no results are present                   |
+
 
 ### Parameters
 
