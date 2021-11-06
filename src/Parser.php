@@ -176,7 +176,8 @@ class Parser
                 "content" => [
                     [
                         "type" => "text",
-                        "text" => $tag->nodeValue,
+                        // force utf-8 decoding
+                        "text" => utf8_decode($tag->nodeValue),
                     ],
                 ],
             ]);
@@ -302,7 +303,8 @@ class Parser
             function ($matches) {
                 // the html tag
                 $tag = $matches[1];
-                $title = strip_tags($matches[3]);
+                // decode html entities to support special characters in headings/slug
+                $title = html_entity_decode(strip_tags($matches[3]));
                 $hasId = preg_match('/id=(["\'])(.*?)\1[\s>]/si', $matches[2], $matchedIds);
                 $id = $hasId ? $matchedIds[2] : $this->generateId($title, false);
 
