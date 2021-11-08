@@ -129,10 +129,35 @@ class Parser
      */
     public function build(): array
     {
+        return $this->supplementExtraOutput(
+            $this->generate()
+        );
+    }
+
+    private function generate(): array
+    {
         if ($this->isHTML()) {
             return $this->generateFromHtml();
         }
-        return $this->generateFromStructure();
+        return  $this->generateFromStructure();
+    }
+
+    public function supplementExtraOutput(array $toc): array
+    {
+        $extra = [];
+
+        $count = count($this->flatten()->generate());
+        $extra['total_results'] = $count;
+
+        if ($count < 1) {
+            $extra['no_results'] = true;
+        }
+
+        if (count($toc) > 0) {
+            return array_merge($toc[0], $extra);
+        }
+
+        return $extra;
     }
 
     /**
@@ -176,7 +201,8 @@ class Parser
                 "content" => [
                     [
                         "type" => "text",
-                        "text" => $tag->nodeValue,
+                        // force utf-8 decoding
+                        "text" => utf8_decode($tag->nodeValue),
                     ],
                 ],
             ]);
@@ -205,8 +231,8 @@ class Parser
             // iterate through each heading and push its information into
             // an array.
             $headings->each(function ($heading, $key) use (&$tocArray) {
-                // Check, if the content type is really text
-                if ($heading["content"][0]["type"] !== "text") {
+                // Check, if the heading isn't empty or if the content type is really text
+                if (!isset($heading["content"]) || $heading["content"][0]["type"] !== "text") {
                     return;
                 }
 
@@ -284,6 +310,7 @@ class Parser
             if ($children = $this->nestHeadings($heading['id'])) {
                 $length = count($headings);
                 $headings[$length - 1]['children'] = $children;
+                $headings[$length - 1]['total_children'] = count($children);
             }
         }
         return empty($headings) ? [] : $headings;
@@ -302,7 +329,8 @@ class Parser
             function ($matches) {
                 // the html tag
                 $tag = $matches[1];
-                $title = strip_tags($matches[3]);
+                // decode html entities to support special characters in headings/slug
+                $title = html_entity_decode(strip_tags($matches[3]));
                 $hasId = preg_match('/id=(["\'])(.*?)\1[\s>]/si', $matches[2], $matchedIds);
                 $id = $hasId ? $matchedIds[2] : $this->generateId($title, false);
 
