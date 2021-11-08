@@ -147,17 +147,20 @@ class Parser
         $extra = [];
 
         $count = count($this->headings);
-        $extra['total_results'] = $count;
-
-        if ($count < 1) {
-            $extra['no_results'] = true;
-        }
 
         if (count($toc) > 0) {
-            return array_merge($toc[0], $extra);
+            $toc[0]["total_results"] = $count;
+            if ($count < 1) {
+                $toc[0]['no_results'] = true;
+            }
+
+            return $toc;
         }
 
-        return $extra;
+        return [
+            "total_results" => $count,
+            "no_results" => $count < 1,
+        ];
     }
 
     /**
@@ -226,6 +229,7 @@ class Parser
         $headings = $raw->filter(function ($item) {
             return is_array($item) && $item["type"] === "heading" && $item["attrs"]["level"] >= $this->minLevel && $item["attrs"]["level"] <= $this->maxLevel;
         });
+
 
         if ($headings->count() > 0) {
             // iterate through each heading and push its information into
