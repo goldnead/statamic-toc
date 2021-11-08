@@ -146,7 +146,7 @@ class Parser
     {
         $extra = [];
 
-        $count = count($this->flatten()->generate());
+        $count = count($this->headings);
         $extra['total_results'] = $count;
 
         if ($count < 1) {
@@ -224,7 +224,7 @@ class Parser
 
         // filter out all the headings
         $headings = $raw->filter(function ($item) {
-            return $item["type"] === "heading" && $item["attrs"]["level"] >= $this->minLevel && $item["attrs"]["level"] <= $this->maxLevel;
+            return is_array($item) && $item["type"] === "heading" && $item["attrs"]["level"] >= $this->minLevel && $item["attrs"]["level"] <= $this->maxLevel;
         });
 
         if ($headings->count() > 0) {

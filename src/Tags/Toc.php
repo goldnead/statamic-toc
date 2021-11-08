@@ -57,8 +57,7 @@ class Toc extends Tags
      */
     public function count()
     {
-        // manually set the 'is_flat' flag, so we can count all elements
-        $this->params->put("is_flat", true);
-        return count($this->index());
+        $result = $this->index();
+        return isset($result["total_results"]) ? $result["total_results"] : count($result);
     }
 }
