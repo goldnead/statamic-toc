@@ -23,9 +23,31 @@ class Parser
 
     private $isFlat = false;
 
-    public function __construct()
+    /**
+     * Constructor.
+     *
+     * @param string $content
+     */
+    public function __construct($content = null)
     {
         $this->slugs = collect($this->slugs);
+
+        if ($content) {
+            $this->setContent($content);
+        }
+        return $this;
+    }
+
+    /**
+     * Set the content to be parsed
+     *
+     * @param string $content
+     * @return void
+     */
+    public function setContent($content): object
+    {
+        $this->content = $content;
+        return $this;
     }
 
     /**
@@ -34,6 +56,8 @@ class Parser
      */
     public function make($content)
     {
+        $this->slugs = collect();
+        $this->headings = [];
         $this->content = $content;
         return $this;
     }

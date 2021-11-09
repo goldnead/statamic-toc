@@ -10,12 +10,13 @@
 namespace Goldnead\StatamicToc\Tags;
 
 use Statamic\Tags\Tags;
-use Goldnead\StatamicToc\Facades\ParserFacade as Parser;
+use Goldnead\StatamicToc\Parser;
 use Statamic\Tags\Concerns;
 
 class Toc extends Tags
 {
     use Concerns\OutputsItems;
+
     /**
      * The {{ toc }} tag.
      *
@@ -39,8 +40,9 @@ class Toc extends Tags
         $raw = !$content ? $this->context->get($field)->raw() : $content;
 
         $isFlat = $this->params->bool("is_flat");
+
         // create parser and generate TOC items
-        $toc = Parser::make($raw);
+        $toc = new Parser($raw);
         $toc->depth($depth)
             ->from($start)
             ->flattenIf($isFlat);
