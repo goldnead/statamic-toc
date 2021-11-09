@@ -24,9 +24,5 @@ class ServiceProvider extends AddonServiceProvider
     public function register()
     {
         parent::register();
-
-        app()->bind('parser', function ($app) {
-            return new Parser();
-        });
     }
 }
