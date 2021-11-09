@@ -57,7 +57,10 @@ class Toc extends Tags
      */
     public function count()
     {
+        $this->params->put("depth", $this->params->int("depth", 6));
+
         $result = $this->index();
-        return isset($result["total_results"]) ? $result["total_results"] : count($result);
+
+        return isset($result[0]["total_results"]) ? $result[0]["total_results"] : $result["total_results"];
     }
 }
