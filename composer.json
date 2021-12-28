@@ -40,7 +40,11 @@
     },
     "config": {
         "process-timeout": 0,
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "third-party/required-plugin": true,
+            "goldnead/*": true
+        }
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
