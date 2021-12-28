@@ -41,10 +41,7 @@
     "config": {
         "process-timeout": 0,
         "sort-packages": true,
-        "allow-plugins": {
-            "third-party/required-plugin": true,
-            "goldnead/*": true
-        }
+        "allow-plugins": true
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
