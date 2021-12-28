@@ -15,14 +15,4 @@ class ServiceProvider extends AddonServiceProvider
     protected $modifiers = [
         TocModifier::class,
     ];
-
-    public function boot()
-    {
-        parent::boot();
-    }
-
-    public function register()
-    {
-        parent::register();
-    }
 }

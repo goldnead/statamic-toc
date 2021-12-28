@@ -17,6 +17,8 @@ class Toc extends Tags
 {
     use Concerns\OutputsItems;
 
+    protected static $handle = 'toc';
+
     /**
      * The {{ toc }} tag.
      *
