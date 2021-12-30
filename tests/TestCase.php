@@ -102,7 +102,30 @@ class TestCase extends OrchestraTestCase
     } else {
       for ($i = 1; $i < $depth; $i++) {
         $content .= '<h' . ($i + 1) . '>Heading ' . ($i + 1) . '</h' . ($i + 1) . '>\n';
-        $content .= '<p>' . $this->faker->paragraph(3) . '</p>\n';
+        $content .= '<p>' . $this->faker->paragraph(3) . ' text with #hash.</p>\n';
+      }
+    }
+    return $content;
+  }
+
+  /** 
+   * Helper
+   * Returns fake Markdown content for testing
+   */
+  protected function fakeMarkdownContent($headings = 3, $depth = 6, $addParagraphs = true, $hasH1 = true)
+  {
+    $content = "";
+    if ($hasH1) {
+      $content .= "# Heading 1\n\n";
+    }
+    if (!$addParagraphs) {
+      for ($i = 1; $i < $headings; $i++) {
+        $content .= str_repeat('#', ($i + 1)) + ' Heading ' . ($i + 1) . "\n";
+      }
+    } else {
+      for ($i = 1; $i < $depth; $i++) {
+        $content .= str_repeat('#', ($i + 1)) . ' Heading ' . ($i + 1) . "\n";
+        $content .= '> ' . $this->faker->paragraph(3) . "\n";
       }
     }
     return $content;

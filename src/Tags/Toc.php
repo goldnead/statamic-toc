@@ -39,7 +39,12 @@ class Toc extends Tags
             return [];
         }
 
-        $raw = !$content ? $this->context->get($field)->raw() : $content;
+        $raw = $content;
+
+        if (!$content) {
+            $field = $this->context->get($field);
+            $raw = is_string($field) ? $field : $field->raw();
+        }
 
         $isFlat = $this->params->bool("is_flat");
 

@@ -63,13 +63,39 @@ class Parser
     }
 
     /**
-     * Determines if the given content is a bard structure or a HTML-String.
+     * Determines if the given content is a string of HTML.
      *
      * @return boolean
      */
     public function isHTML(): bool
     {
-        return is_string($this->content);
+        if (!is_string($this->content)) {
+            return false;
+        }
+
+        return Str::contains($this->content, '<h');
+    }
+
+    /**
+     * Determines if the given content is a bard array.
+     */
+    public function isBard(): bool
+    {
+        return is_array($this->content);
+    }
+
+    /**
+     * Determines if the given content is a string of markdown.
+     *
+     * @return boolean
+     */
+    public function isMarkdown(): bool
+    {
+        if (!is_string($this->content)) {
+            return false;
+        }
+
+        return Str::contains($this->content, '#') && !$this->isHTML();
     }
 
     /**
@@ -159,8 +185,11 @@ class Parser
     {
         if ($this->isHTML()) {
             return $this->generateFromHtml();
+        } else if ($this->isMarkdown()) {
+            return $this->generateFromMarkdown();
+        } else {
+            return  $this->generateFromStructure();
         }
-        return  $this->generateFromStructure();
     }
 
     public function supplementExtraOutput(array $toc): array
@@ -190,8 +219,11 @@ class Parser
      *
      * @return array
      */
-    private function generateFromHtml(): array
+    private function generateFromHtml($content = null): array
     {
+        if (!$content) {
+            $content = $this->content;
+        }
         // tidy up & load our DOM.
         $tidy_config = array(
             "indent"               => true,
@@ -204,7 +236,7 @@ class Parser
             "char-encoding"        => "utf8",
             "repeated-attributes"  => "keep-last"
         );
-        $html = tidy_repair_string($this->content, $tidy_config);
+        $html = tidy_repair_string($content, $tidy_config);
         $doc = new \DOMDocument();
         $doc->loadHTML($html);
 
@@ -233,6 +265,20 @@ class Parser
         }
 
         return $this->generateFromStructure($headings->toArray());
+    }
+
+    /**
+     * Parses a markdown-input and converts it to HTML to be processed
+     * by $this->generateFromHtml().
+     *
+     * @return array
+     */
+    private function generateFromMarkdown(): array
+    {
+        $converter = new \League\CommonMark\CommonMarkConverter();
+        $html = $converter->convertToHtml($this->content);
+
+        return $this->generateFromHtml($html);
     }
 
     /**
