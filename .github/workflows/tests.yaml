@@ -22,7 +22,7 @@ jobs:
                 os: [ubuntu-latest]
                 include:
                     - laravel: 8.*
-                      testbench: 6.*
+                      testbench: 6.23
                     - laravel: 7.*
                       testbench: 5.*
                     - php: 7.4
