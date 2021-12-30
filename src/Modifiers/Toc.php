@@ -13,7 +13,7 @@ use Goldnead\StatamicToc\Facades\ParserFacade as Parser;
 class Toc extends Modifier
 {
     /**
-     * Modify a value.
+     * Injects IDs into the DOM.
      *
      * @param mixed  $value    The value to be modified
      * @param array  $params   Any parameters used in the modifier

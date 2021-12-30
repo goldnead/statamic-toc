@@ -85,7 +85,7 @@ class Parser
     }
 
     /**
-     * Sets the strating point from which the list should be displayed.
+     * Sets the starting point from which the list should be displayed.
      *
      * @param string|int $start
      * @return $this
@@ -123,7 +123,7 @@ class Parser
 
     /**
      * Stops the recursion at the given level.
-     * TODO
+     * TODO/FEATURE/WHY?
      *
      * @param [type] $level
      * @return void
@@ -140,10 +140,7 @@ class Parser
      */
     public function flattenIf($bool)
     {
-        if ($bool) {
-            $this->flatten();
-        }
-        return $this;
+        return $bool ? $this->flatten() : $this;
     }
 
     /**
@@ -330,7 +327,9 @@ class Parser
     {
         $headings = [];
         foreach ($this->headings as $key => $heading) {
-            if (!array_key_exists('parent', $heading) || $heading['parent'] != $parent) continue;
+            if (!array_key_exists('parent', $heading) || $heading['parent'] != $parent) {
+                continue;
+            }
 
             $headings[] = $heading;
 
