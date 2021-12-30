@@ -21,12 +21,6 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function test_it_can_be_instantiated()
-  {
-    $this->assertInstanceOf(TocTag::class, $this->tag);
-  }
-
-  /** @test */
   public function tag_outputs_array()
   {
     $this->tag->setParameters([
