@@ -20,7 +20,7 @@ jobs:
           - laravel: 7.*
             testbench: 5.*
 
-    name: PHP-${{ matrix.php }} - Sttmc-${{ matrix.statamic }} - L-${{ matrix.laravel }}
+    name: ${{ matrix.php }} - ${{ matrix.statamic }} - ${{ matrix.laravel }}
 
     steps:
       - name: Checkout code
@@ -36,6 +36,6 @@ jobs:
       - name: Install dependencies
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" "statamic/cms:${{ matrix.statamic }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-          composer update --no-interaction
+          composer install --no-interaction
       - name: Run PHPUnit
         run: composer test

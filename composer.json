@@ -36,7 +36,8 @@
     },
     "require-dev": {
         "orchestra/testbench": "^5.0|^6.0",
-        "spatie/test-time": "^1.2"
+        "spatie/test-time": "^1.2",
+        "nunomaduro/collision": "^4.2"
     },
     "config": {
         "optimize-autoloader": true,
@@ -46,7 +47,7 @@
     },
     "scripts": {
         "test": [
-            "vendor/bin/phpunit"
+            "php -d memory_limit=-1 -d max_execution_time=0 ./vendor/bin/phpunit"
         ],
         "lint": [
             "php-cs-fixer fix ./src"

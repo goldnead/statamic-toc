@@ -327,7 +327,9 @@ class Parser
     {
         $headings = [];
         foreach ($this->headings as $key => $heading) {
-            if (!array_key_exists('parent', $heading) || $heading['parent'] != $parent) continue;
+            if (!array_key_exists('parent', $heading) || $heading['parent'] != $parent) {
+                continue;
+            }
 
             $headings[] = $heading;
 
