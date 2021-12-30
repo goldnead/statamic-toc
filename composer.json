@@ -2,7 +2,7 @@
     "name": "goldnead/statamic-toc",
     "description": "Automatic Table Of Contents Generator for Statamic Bard-Fields.",
     "type": "statamic-addon",
-    "license": "MIT",
+    "license": "proprietary",
     "autoload": {
         "psr-4": {
             "Goldnead\\StatamicToc\\": "src/"
