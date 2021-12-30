@@ -37,6 +37,5 @@ jobs:
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" "statamic/cms:${{ matrix.statamic }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --no-interaction
-          composer update statamic/cms --no-interaction --with-dependencies
       - name: Run PHPUnit
         run: composer test
