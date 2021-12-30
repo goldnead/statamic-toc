@@ -2,13 +2,10 @@
 
 namespace Goldnead\StatamicToc\Tests;
 
-use Faker\Provider\Lorem;
-use Goldnead\StatamicToc\ServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Statamic\Extend\Manifest;
 use Statamic\Fields\Value;
 use Statamic\Fieldtypes\Bard;
-use Statamic\Providers\StatamicServiceProvider;
 use Statamic\Statamic;
 
 class TestCase extends OrchestraTestCase
