@@ -2,9 +2,9 @@
 ![Statamic v3](https://img.shields.io/badge/Statamic-3+-FF269E)
 ![workflow](https://github.com/goldnead/statamic-toc/actions/workflows/tests.yaml/badge.svg)
 
-# Automatic Table Of Contents for Statamic Bard-Fields
+# Automatic Table Of Contents for Statamic Bard-Fields, Markdown or HTML content
 
-This addon generates a Table-Of-Contents (ToC) for any Bard-Field in Statamic. Just like any Antlers-Tag you can use this addon in your templates with some Statamic-Magic Sugar:
+This addon generates a Table-Of-Contents (ToC) for any Bard- or Markdown-Field in Statamic. Just like any Antlers-Tag you can use this addon in your templates with the usual Statamic-Magic Sugar:
 
 ```html
 <div class="max-w-md mx-auto">
@@ -42,7 +42,7 @@ No further Vendor-Publishing or config files are needed.
 
 This Addon provides functionality to automatically generate an array of the headings from your bard-field so you can iterate through them in your template. It also ships with a modifier to automatically generate IDs for anchor-links.
 
-### Bard setup
+### Blueprint setup
 
 The idea behind this addon is that it should work out of the box with your existing Bard-Setup. Behind the scenes it will parse its
 content for headlines and generates an associative nested (or unnested, see options below) array that you can iterate through.
@@ -89,8 +89,21 @@ sections:
 ```
 
 Of course, you can use as many heading-buttons as you like.
-If you prefer to save your bard-content as HTML, you can safely do so. This addon works best with structured bard-data
-but HTML is also supported and works as intended. So you can safely turn on `save_html: true` in your bard-settings.
+If you prefer to save your bard-content as HTML, you can safely do so. This addon works best with structured bard-data, though.
+Still, HTML is also supported and works as intended. So you can safely turn on `save_html: true` in your bard-settings.
+You can also use this addon with your markdown-fields. Just pass it along to the tag like so:
+```
+{{ toc content="{markdown} }}
+  ...
+{{ /toc }}
+```
+
+or 
+```
+{{ toc field="{markdown_fieldname} }}
+  ...
+{{ /toc }}
+```
 
 ### `toc` Modifier
 

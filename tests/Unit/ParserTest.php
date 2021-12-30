@@ -11,17 +11,42 @@ class ParserTest extends TestCase
 {
   public $parser;
 
-  public function setUp(): void
-  {
-    parent::setUp();
-  }
-
   /** @test */
   public function test_can_detect_html()
   {
     $html = $this->fakeHTMLContent(2, 3);
     $parser = new Parser($html);
     $this->assertTrue($parser->isHtml($html));
+
+    $markdown = $this->fakeMarkdownContent(2, 3);
+    $parser = new Parser($markdown);
+    $this->assertFalse($parser->isHTML($markdown));
+  }
+
+  /** @test */
+  public function test_can_detect_markdown()
+  {
+    $markdown = $this->fakeMarkdownContent(2, 3);
+    $parser = new Parser($markdown);
+    $this->assertTrue($parser->isMarkdown($markdown));
+
+    $html = $this->fakeHTMLContent(2, 3);
+    $parser = new Parser($html);
+    $this->assertFalse($parser->isMarkdown($html));
+  }
+
+  /** @test */
+  public function test_can_build_toc_tree_from_markdown()
+  {
+    $markdown = $this->fakeMarkdownContent(4, 3);
+    $markdown .= $this->fakeMarkdownContent(2, 3, true, false);
+    $parser = new Parser($markdown);
+    $tree = $parser->depth(6)->build();
+
+    $this->assertEquals(1, count($tree));
+    $this->assertEquals(2, count($tree[0]['children']));
+    $this->assertEquals(1, count($tree[0]['children'][0]['children']));
+    $this->assertEquals(1, count($tree[0]['children'][1]['children']));
   }
 
   /** @test */
