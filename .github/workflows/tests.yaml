@@ -22,7 +22,7 @@ jobs:
                 os: [ubuntu-latest]
                 include:
                     - laravel: 8.*
-                      testbench: 6.23
+                      testbench: 6.*
                     - laravel: 7.*
                       testbench: 5.*
                     - php: 7.4
@@ -48,6 +48,7 @@ jobs:
             - name: Install dependencies
               run: |
                   composer require "laravel/framework:${{ matrix.laravel }}" "statamic/cms:${{ matrix.statamic }}" "orchestra/testbench:${{ matrix.testbench }}" ${{ matrix.additional-deps }} --no-interaction --no-update
-                  composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --with-dependencies
+                  composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction
+                  composer update statamic/cms --with-dependencies --no-interaction
             - name: Run PHPUnit
               run: composer test
