@@ -2,8 +2,6 @@ name: Test Suite
 
 on:
   push:
-    branches:
-      - main
   pull_request:
 
 jobs:
@@ -40,5 +38,6 @@ jobs:
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" "statamic/cms:${{ matrix.statamic }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer install --no-interaction
+
       - name: Run PHPUnit
         run: composer test
