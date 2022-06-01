@@ -97,7 +97,7 @@ If you prefer to save your bard-content as HTML, you can safely turn on `save_ht
 You can also use this addon with your markdown-fields. Just pass it along to the tag like this:
 
 ```
-{{ toc content="{markdown} }}
+{{ toc content="{markdown}" }}
   ...
 {{ /toc }}
 ```
@@ -105,7 +105,7 @@ You can also use this addon with your markdown-fields. Just pass it along to the
 or
 
 ```
-{{ toc field="{markdown_fieldname} }}
+{{ toc field="{markdown_fieldname}" }}
   ...
 {{ /toc }}
 ```
