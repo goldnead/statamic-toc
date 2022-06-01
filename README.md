@@ -4,7 +4,7 @@
 
 # Statamic ToC
 
-?> Automatic Table Of Contents for Statamic Bard or Markdown fields or other HTML content
+Automatic Table Of Contents for Statamic Bard or Markdown fields or other HTML content
 
 This addon generates a Table-Of-Contents (ToC) for any Bard- or Markdown-Field in Statamic. Just like any Antlers-Tag you can use this addon in your templates with the usual Statamic-Magic Sugar:
 
