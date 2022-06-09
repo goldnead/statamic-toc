@@ -311,6 +311,7 @@ class Parser
                 $this->headings[] = [
                     "toc_title" => $title,
                     "level" => $heading["attrs"]["level"],
+                    "tag_level" => $heading["attrs"]["level"],
                     "toc_id" => $this->generateId($title, true),
                 ];
                 $this->headings[sizeof($this->headings) - 1]['id'] = sizeof($this->headings);
@@ -318,12 +319,16 @@ class Parser
         }
 
         // get root & max level info
-        $rootLevel = collect($this->headings)->min("level");
-        $maxLevel = collect($this->headings)->max("level");
+        $rootLevel = 0; //collect($this->headings)->min("tag_level");
+        $maxLevel = collect($this->headings)->max("tag_level");
+        $currentLevel = $rootLevel;
 
         // get additional info for each heading and specify parent & children relationships
         if (!empty($this->headings)) {
-            collect($this->headings)->each(function ($heading, $key) use ($rootLevel, $maxLevel) {
+            collect($this->headings)->each(function ($heading, $key) use ($rootLevel, $maxLevel, &$currentLevel) {
+                $heading['level'] = $currentLevel;
+                $this->headings[$key]['level'] = $heading['level'];
+
                 if ($heading['level'] == $rootLevel) {
                     $this->headings[$key]['is_root'] = true;
                     // we need a default value for the nesting function to work properly
@@ -331,26 +336,30 @@ class Parser
                 }
 
                 // if the next item in line level is lower, the current item has children
-                if (isset($this->headings[$key + 1]) && $this->headings[$key + 1]['level'] > $heading['level']) {
+                if (isset($this->headings[$key + 1]) && $this->headings[$key + 1]['tag_level'] > $heading['tag_level']) {
                     $this->headings[$key]['has_children'] = true;
+                    $currentLevel++;
                 }
 
-                if ($heading['level'] == $maxLevel) {
+                if ($heading['tag_level'] == $maxLevel) {
                     $this->headings[$key]['is_deepest_children'] = true;
                 }
 
                 // get parent ids for all items that aren't at root level
                 if ($heading['level'] > $rootLevel) {
-                    if ($this->headings[$key - 1]['level'] < $heading['level']) {
+                    if ($key === 0) {
+                        throw new \Exception("Invalid tree structure. First item isn't at root level.");
+                    }
+                    if ($this->headings[$key - 1]['tag_level'] < $heading['tag_level']) {
                         $this->headings[$key]['parent'] = $this->headings[$key - 1]['id'];
                     }
-                    if ($this->headings[$key - 1]['level'] === $heading['level']) {
+                    if ($this->headings[$key - 1]['tag_level'] === $heading['tag_level']) {
                         $this->headings[$key]['parent'] = $this->headings[$key - 1]['parent'];
                     }
-                    if ($this->headings[$key - 1]['level'] > $heading['level']) {
+                    if ($this->headings[$key - 1]['tag_level'] > $heading['tag_level']) {
                         $i = $key;
                         while ($i--) {
-                            if ($this->headings[$i]['level'] < $heading['level']) {
+                            if ($this->headings[$i]['tag_level'] < $heading['tag_level']) {
                                 $this->headings[$key]['parent'] = $this->headings[$i]['id'];
                                 break;
                             }
@@ -372,6 +381,7 @@ class Parser
     private function nestHeadings($parent = 0)
     {
         $headings = [];
+        //dd($this->headings);
         foreach ($this->headings as $key => $heading) {
             if (!array_key_exists('parent', $heading) || $heading['parent'] != $parent) {
                 continue;
