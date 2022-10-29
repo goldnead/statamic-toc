@@ -128,6 +128,20 @@ Then you get something like this:
 </p>
 ```
 
+You can also pass parameters to the modifier like so:
+```antlers
+{{ text | toc('x-bind:id="#[id]"') }}
+```
+This adds additional attributes to the heading nodes where `[id]` will be replaced with the ID of the heading:
+
+```html
+<h2 id="this-is-an-example-heading" x-bind:id="#this-is-an-example-heading">This is an example heading</h2>
+<p>
+  Voluptate do ad anim do mollit proident incididunt culpa ex quis aliquip et
+  irure Lorem. Voluptate enim cillum do nostrud eiusmod deserunt.
+</p>
+```
+
 !> Note: When headings are duplicated, the ID is suffixed with a number preventing duplicated IDs which would be semantially wrong in HTML.
 
 ### The `toc` Tag

@@ -70,6 +70,10 @@ class Toc extends Tags
 
         $result = $this->index();
 
-        return isset($result[0]["total_results"]) ? $result[0]["total_results"] : $result["total_results"];
+        if (empty($result)) {
+            return 0;
+        }
+
+        return isset($result[0]) ? $result[0]["total_results"] : $result["total_results"];
     }
 }
