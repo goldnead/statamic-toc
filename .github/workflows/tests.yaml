@@ -20,6 +20,10 @@ jobs:
             testbench: 6.*
           - laravel: 7.*
             testbench: 5.*
+          - laravel: 9.*
+            testbench: 7.*
+          - laravel: 10.*
+            testbench: 8.*
 
     name: P${{ matrix.php }} - S${{ matrix.statamic }} - L${{ matrix.laravel }}
 
@@ -37,6 +41,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" "statamic/cms:${{ matrix.statamic }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer update --prefer-dist --no-interaction --no-suggest
           composer install --no-interaction
 
       - name: Run PHPUnit
