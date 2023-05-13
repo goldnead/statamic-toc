@@ -12,9 +12,9 @@ jobs:
       fail-fast: false
       matrix:
         php: [7.4, 8.0, 8.2]
-        statamic: [3.3.*, 3.4.*, 4.0.*]
+        laravel: [8.*, 7.*, 9.*, 10.*]
+        statamic: [3.0.*, 3.3.*, 3.4.*, 4.0.*]
         os: [ubuntu-latest]
-        laravel: [8.*, 9.*, 10.*]
         include:
           - laravel: 8.*
             testbench: 6.*
@@ -40,7 +40,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "statamic/cms:${{ matrix.statamic }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --with-all-dependencies
+          composer require "laravel/framework:${{ matrix.laravel }}" "statamic/cms:${{ matrix.statamic }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer install --no-interaction
 
       - name: Run PHPUnit
