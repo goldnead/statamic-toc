@@ -41,7 +41,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" "statamic/cms:${{ matrix.statamic }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --with-all-dependencies
-          composer update --prefer-stable --prefer-dist --no-interaction --no-suggest
+          composer install --no-interaction
 
       - name: Run PHPUnit
         run: composer test
