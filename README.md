@@ -208,5 +208,3 @@ You can control the behaviour with the following tag-parameters:
 ## License
 
 This is commercial software. To use it in production you need to purchase a license at the [Statamic-Marketplace](https://statamic.com/addons).
-
-Test
