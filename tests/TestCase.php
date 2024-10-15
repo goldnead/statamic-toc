@@ -95,6 +95,7 @@ class TestCase extends OrchestraTestCase
      */
     protected function fakeHTMLContent($headings = 3, $depth = 6, $addParagraphs = true, $hasH1 = true)
     {
+        $this->faker->seed(1234);
         $content = '';
         if ($hasH1) {
             $content .= '<h1>Heading 1</h1>'.PHP_EOL;

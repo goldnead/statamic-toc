@@ -67,8 +67,6 @@ class Parser
 
     /**
      * Determines if the given content is a string of HTML.
-     *
-     * @return bool
      */
     public function isHTML(): bool
     {
@@ -89,8 +87,6 @@ class Parser
 
     /**
      * Determines if the given content is a string of markdown.
-     *
-     * @return bool
      */
     public function isMarkdown(): bool
     {
@@ -160,9 +156,7 @@ class Parser
      * @param [type] $level
      * @return void
      */
-    public function flattenFrom($level)
-    {
-    }
+    public function flattenFrom($level) {}
 
     /**
      * Sets the flattening only if the given parameter is true.
@@ -177,8 +171,6 @@ class Parser
 
     /**
      * Generates the output array.
-     *
-     * @return array
      */
     public function build(): array
     {
@@ -194,7 +186,7 @@ class Parser
         } elseif ($this->isMarkdown()) {
             return $this->generateFromMarkdown();
         } else {
-            return  $this->generateFromStructure();
+            return $this->generateFromStructure();
         }
     }
 
@@ -239,7 +231,7 @@ class Parser
         $content = mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8');
 
         // Laden Sie das HTML in das DOMDocument
-        $doc->loadHTML($content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $doc->loadHTML('<!DOCTYPE html><html><body>'.$content.'</body></html>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
         // Bereinigen Sie die Fehler
         libxml_clear_errors();
@@ -274,12 +266,10 @@ class Parser
     /**
      * Parses a markdown-input and converts it to HTML to be processed
      * by $this->generateFromHtml().
-     *
-     * @return array
      */
     private function generateFromMarkdown(): array
     {
-        $converter = new \League\CommonMark\CommonMarkConverter();
+        $converter = new \League\CommonMark\CommonMarkConverter;
         $html = $converter->convertToHtml($this->content);
 
         return $this->generateFromHtml($html);
@@ -400,8 +390,6 @@ class Parser
 
     /**
      * Injects header HTML-Elements with thparamseir corersponding ids.
-     *
-     * @return string
      */
     public function injectIds($value, $params = null): string
     {
@@ -427,6 +415,7 @@ class Parser
                 }
 
                 $params = str_replace('[id]', $id, $params);
+
                 // rebuild the tag with Id.
                 return sprintf('<%s%s id="%s" %s>%s</%s>', $tag, $matches[2], $id, $params, $matches[3], $tag);
             },
@@ -439,7 +428,7 @@ class Parser
     /**
      * Slugifies a given title
      *
-     * @return string        [description]
+     * @return string [description]
      */
     private function generateId($title, $list = false): string
     {
