@@ -288,8 +288,6 @@ class Parser
     /**
      * Generates an array of elements necessairy for the TOC-Tag to
      * function.
-     *
-     * @return array
      */
     private function generateFromStructure($structure = null): array
     {
@@ -327,13 +325,14 @@ class Parser
         // get additional info for each heading and specify parent & children relationships
         if (! empty($this->headings)) {
             collect($this->headings)->each(function ($heading, $key) use ($rootLevel, $maxLevel) {
+                // Standardmäßig parent auf null setzen
+                $this->headings[$key]['parent'] = null;
+
                 if ($heading['level'] == $rootLevel) {
                     $this->headings[$key]['is_root'] = true;
-                    // we need a default value for the nesting function to work properly
-                    $this->headings[$key]['parent'] = null;
                 }
 
-                // if the next item in line level is lower, the current item has children
+                // Prüfen, ob die nächste Überschrift eine tiefere Ebene hat
                 if (isset($this->headings[$key + 1]) && $this->headings[$key + 1]['level'] > $heading['level']) {
                     $this->headings[$key]['has_children'] = true;
                 }
@@ -342,26 +341,33 @@ class Parser
                     $this->headings[$key]['is_deepest_children'] = true;
                 }
 
-                // get parent ids for all items that aren't at root level
-                if ($heading['level'] > $rootLevel) {
-                    if ($this->headings[$key - 1]['level'] < $heading['level']) {
-                        $this->headings[$key]['parent'] = $this->headings[$key - 1]['id'];
-                    }
-                    if ($this->headings[$key - 1]['level'] === $heading['level']) {
-                        $this->headings[$key]['parent'] = $this->headings[$key - 1]['parent'];
-                    }
-                    if ($this->headings[$key - 1]['level'] > $heading['level']) {
-                        $i = $key;
-                        while ($i--) {
+                if ($key > 0) {
+                    $prevHeading = $this->headings[$key - 1];
+
+                    if ($heading['level'] > $prevHeading['level']) {
+                        // Die aktuelle Überschrift ist eine Unterüberschrift der vorherigen
+                        $this->headings[$key]['parent'] = $prevHeading['id'];
+                    } elseif ($heading['level'] == $prevHeading['level']) {
+                        // Die aktuelle Überschrift ist auf derselben Ebene wie die vorherige
+                        $this->headings[$key]['parent'] = $prevHeading['parent'];
+                    } else {
+                        // Die aktuelle Überschrift ist eine übergeordnete Ebene
+                        $i = $key - 1;
+                        while ($i >= 0) {
                             if ($this->headings[$i]['level'] < $heading['level']) {
                                 $this->headings[$key]['parent'] = $this->headings[$i]['id'];
                                 break;
                             }
+                            $i--;
                         }
+                        // Wenn kein Elternteil gefunden wurde, bleibt parent null
                     }
+                } else {
+                    // Erste Überschrift, parent bleibt null
                 }
             });
         }
+
         // return flat array if flag is true, nest it if not
         return $this->isFlat ? $this->headings : $this->nestHeadings();
     }
