@@ -167,9 +167,6 @@ class ParserTest extends TestCase
         $parser = new Parser($html);
         $tree = $parser->depth(6)->build();
 
-        echo "Generated HTML:\n$html\n";
-        print_r($tree);
-
         $this->assertEquals('heading-1', $tree[0]['toc_id']);
         $this->assertEquals('heading-2', $tree[0]['children'][0]['toc_id']);
         $this->assertEquals('heading-2-2', $tree[0]['children'][1]['toc_id']);
