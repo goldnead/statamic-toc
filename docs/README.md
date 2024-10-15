@@ -129,13 +129,17 @@ Then you get something like this:
 ```
 
 You can also pass parameters to the modifier like so:
+
 ```antlers
 {{ text | toc('x-bind:id="#[id]"') }}
 ```
+
 This adds additional attributes to the heading nodes where `[id]` will be replaced with the ID of the heading:
 
 ```html
-<h2 id="this-is-an-example-heading" x-bind:id="#this-is-an-example-heading">This is an example heading</h2>
+<h2 id="this-is-an-example-heading" x-bind:id="#this-is-an-example-heading">
+  This is an example heading
+</h2>
 <p>
   Voluptate do ad anim do mollit proident incididunt culpa ex quis aliquip et
   irure Lorem. Voluptate enim cillum do nostrud eiusmod deserunt.
@@ -185,6 +189,21 @@ If you don't want to display your ToC as a nested list you can pass the paramete
 </ol>
 ```
 
+### The `toc:count` Tag
+
+You can use this tag to check how many headings are present in the content section.
+
+Use it like the main `toc` Tag described above.
+
+Example:
+
+```
+{{ if {toc:count} > 0 }}
+  {{# Show stuff, if headings are present #}}
+  ...
+{{ /if }}
+```
+
 ### Variables
 
 Every Item has the following variables at your disposal:
@@ -193,7 +212,7 @@ Every Item has the following variables at your disposal:
 | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
 | `toc_title` _(string)_   | The title of the heading (Note: `title` would be more obvious, but this lead to some weird cascade issues.) |
 | ` toc_id` _(string)_     | The slugified title to use as anchor-id                                                                     |
-| `id` _(int)_               | The internal id used to assign children and parents                                                         |
+| `id` _(int)_             | The internal id used to assign children and parents                                                         |
 | ` is_root` _(bool)_      | A flag to determine if the current heading is at root level                                                 |
 | `parent` _(int/null)_    | Id of parent item if current item is a child                                                                |
 | `has_children` _(bool)_  | Flag if current item has children                                                                           |
