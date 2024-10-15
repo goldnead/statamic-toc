@@ -222,38 +222,36 @@ class Parser
     /**
      * Parses a HTML-input and returns a fake bard-structure to be processed
      * by $this->generateFromStructure().
-     *
-     * @return array
      */
     private function generateFromHtml($content = null): array
     {
         if (! $content) {
             $content = $this->content;
         }
-        // tidy up & load our DOM.
-        $tidy_config = [
-            'indent' => true,
-            'output-xml' => true,
-            'output-xhtml' => false,
-            'drop-empty-paras' => false,
-            'hide-comments' => true,
-            'numeric-entities' => true,
-            'doctype' => 'omit',
-            'char-encoding' => 'utf8',
-            'repeated-attributes' => 'keep-last',
-        ];
-        $html = tidy_repair_string($content, $tidy_config);
-        $doc = new \DOMDocument();
-        $doc->loadHTML($html);
 
-        // create an xPath Query to get all headings in order.
+        // Erstellen Sie eine neue Instanz von DOMDocument
+        $doc = new \DOMDocument;
+
+        // Vermeiden von Warnungen bei fehlerhaftem HTML
+        libxml_use_internal_errors(true);
+
+        // Stellen Sie sicher, dass der Inhalt in UTF-8 kodiert ist
+        $content = mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8');
+
+        // Laden Sie das HTML in das DOMDocument
+        $doc->loadHTML($content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        // Bereinigen Sie die Fehler
+        libxml_clear_errors();
+
+        // Erstellen Sie eine XPath-Abfrage, um alle Überschriften in der richtigen Reihenfolge zu erhalten
         $xpath = new \DOMXpath($doc);
         $htags = $xpath->query('//h1 | //h2 | //h3 | //h4 | //h5 | //h6');
 
-        // empty container collection or our headings
+        // Leere Sammlung für unsere Überschriften
         $headings = collect([]);
-        // iterage over each tag and set an object similar to the one used by bard
-        // which can be parsed by $this->generateFromStructure();
+
+        // Iterieren Sie über jedes Tag und erstellen Sie ein Objekt ähnlich dem, das von Bard verwendet wird
         foreach ($htags as $tag) {
             $headings->push([
                 'type' => 'heading',
@@ -263,8 +261,8 @@ class Parser
                 'content' => [
                     [
                         'type' => 'text',
-                        // force utf-8 decoding
-                        'text' => utf8_decode($tag->nodeValue),
+                        // Stellen Sie sicher, dass der Text in UTF-8 ist
+                        'text' => $tag->nodeValue,
                     ],
                 ],
             ]);
