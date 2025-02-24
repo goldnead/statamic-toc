@@ -317,6 +317,7 @@ class Parser
             collect($this->headings)->each(function ($heading, $key) use ($rootLevel, $maxLevel) {
                 // Standardmäßig parent auf null setzen
                 $this->headings[$key]['parent'] = null;
+                $this->headings[$key]['has_children'] = false;
 
                 if ($heading['level'] == $rootLevel) {
                     $this->headings[$key]['is_root'] = true;
