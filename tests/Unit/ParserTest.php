@@ -142,21 +142,24 @@ class ParserTest extends TestCase
         if (isset($child['is_root'])) {
             $this->assertIsBool($child['is_root']);
         }
-        if (isset($child['has_hildren'])) {
-            $this->assertIsBool($child['has_hildren']);
+        if (isset($child['has_children'])) {
+            $this->assertIsBool($child['has_children']);
+        }
+        if (isset($child['children'])) {
+            $this->assertIsArray($child['children']);
+            // If children exist, total_children should also exist
+            $this->assertArrayHasKey('total_children', $child);
             $this->assertIsInt($child['total_children']);
+            $this->assertEquals(count($child['children']), $child['total_children']);
+            foreach ($child['children'] as $child) {
+                $this->assertChild($child);
+            }
         }
         if ($child['level'] > 1) {
             $this->assertIsInt($child['parent']);
             $this->assertGreaterThan(0, $child['parent']);
         }
         $this->assertIsInt($child['level']);
-        if (isset($child['children'])) {
-            $this->assertIsArray($child['children']);
-            foreach ($child['children'] as $child) {
-                $this->assertChild($child);
-            }
-        }
     }
 
     /** @test */
