@@ -2,6 +2,10 @@
 
 All notable changes to `statamic-toc` will be documented in this file.
 
+## ???-??-?? v1.05
+
+- Support for Statamic v6
+
 ## 2021-07-08 v1.0.4
 
 - Support Level-Start
