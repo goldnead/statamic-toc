@@ -78,6 +78,40 @@ class ParserSafetyTest extends TestCase
     }
 
     /** @test */
+    public function test_handles_content_first_element_not_array()
+    {
+        $content = [
+            [
+                'type' => 'heading',
+                'attrs' => ['level' => 2],
+                'content' => ['not an array element'],
+            ],
+        ];
+
+        $result = (new Parser($content))->build();
+
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['total_results']);
+    }
+
+    /** @test */
+    public function test_handles_content_first_element_missing_text_key()
+    {
+        $content = [
+            [
+                'type' => 'heading',
+                'attrs' => ['level' => 2],
+                'content' => [['type' => 'text']], // missing 'text' key
+            ],
+        ];
+
+        $result = (new Parser($content))->build();
+
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['total_results']);
+    }
+
+    /** @test */
     public function test_from_preserves_depth_when_minlevel_changes()
     {
         // depth(2) from h2 should only include h2 and h3, not h4
