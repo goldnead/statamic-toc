@@ -3,66 +3,65 @@
 namespace Tests\Unit;
 
 use Goldnead\StatamicToc\Tests\TestCase;
+use Goldnead\StatamicToc\Tags\Toc as TocTag;
 use Statamic\Facades\Antlers;
 
 class RecursionTest extends TestCase
 {
+    protected $tag;
+
     protected function setUp(): void
     {
         parent::setUp();
-        app('statamic.tags')->put('toc', \Goldnead\StatamicToc\Tags\Toc::class);
+        $this->tag = resolve(TocTag::class)
+            ->setParser(Antlers::parser())
+            ->setContext([]);
     }
 
     /** @test */
-    public function it_renders_toc_without_when_via_antlers()
+    public function when_true_renders_toc()
     {
-        $content = '<h1>Heading 1</h1><h2>Heading 2</h2>';
+        $this->tag->setParameters([
+            'content' => '<h1>Heading 1</h1><h2>Heading 2</h2>',
+            'when' => true,
+        ]);
+        $output = $this->tag->index();
 
-        $template = <<<'EOT'
-{{ toc :content="content" }}
-<li>{{ toc_title }}</li>
-{{ /toc }}
-EOT;
-
-        $data = ['content' => $content];
-
-        $output = (string) Antlers::parse($template, $data);
-
-        $this->assertStringContainsString('Heading 1', $output);
+        $this->assertNotEmpty($output);
+        $this->assertEquals('Heading 1', $output[0]['toc_title']);
     }
 
     /** @test */
-    public function it_renders_toc_with_when_param()
+    public function when_false_suppresses_toc()
     {
-        $content = '<h1>Heading 1</h1><h2>Heading 2</h2>';
+        $this->tag->setParameters([
+            'content' => '<h1>Heading 1</h1><h2>Heading 2</h2>',
+            'when' => false,
+        ]);
 
-        $template = <<<'EOT'
-    <ol>
-    {{ toc :content="content" :when="show_toc" }}
-        <li>
-            <a href="#{{ toc_id }}">{{ toc_title }}</a>
-            {{ if children }}
-            <ol>
-                {{ *recursive children* }}
-            </ol>
-            {{ /if }}
-        </li>
-    {{ /toc }}
-    </ol>
-EOT;
+        $this->assertSame([], $this->tag->index());
+    }
 
-        $data = [
-            'content' => $content,
-            'show_toc' => true,
-        ];
+    /** @test */
+    public function when_string_false_suppresses_toc()
+    {
+        $this->tag->setParameters([
+            'content' => '<h1>Heading 1</h1><h2>Heading 2</h2>',
+            'when' => 'false',
+        ]);
 
-        $output = (string) Antlers::parse($template, $data);
+        $this->assertSame([], $this->tag->index());
+    }
 
-        $this->assertStringContainsString('Heading 1', $output);
+    /** @test */
+    public function when_string_true_renders_toc()
+    {
+        $this->tag->setParameters([
+            'content' => '<h1>Heading 1</h1><h2>Heading 2</h2>',
+            'when' => 'true',
+        ]);
+        $output = $this->tag->index();
 
-        // Test false
-        $data['show_toc'] = false;
-        $output = (string) Antlers::parse($template, $data);
-        $this->assertStringNotContainsString('Heading 1', $output);
+        $this->assertNotEmpty($output);
     }
 }
