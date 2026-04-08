@@ -129,10 +129,11 @@ class Parser
             $start = 6;
         }
 
+        $currentDepth = $this->maxLevel - $this->minLevel + 1;
         $this->minLevel = $start;
-        // our depth is relative to the minLevel. So we need to update is if
+        // our depth is relative to the minLevel. So we need to update it if
         // the minLevel changes
-        $this->depth($this->maxLevel);
+        $this->depth($currentDepth);
 
         return $this;
     }
@@ -286,7 +287,12 @@ class Parser
 
         // filter out all the headings
         $headings = $raw->filter(function ($item) {
-            return is_array($item) && $item['type'] === 'heading' && $item['attrs']['level'] >= $this->minLevel && $item['attrs']['level'] <= $this->maxLevel;
+            return is_array($item)
+                && isset($item['type'])
+                && $item['type'] === 'heading'
+                && isset($item['attrs']['level'])
+                && $item['attrs']['level'] >= $this->minLevel
+                && $item['attrs']['level'] <= $this->maxLevel;
         });
 
         if ($headings->count() > 0) {
@@ -294,7 +300,7 @@ class Parser
             // an array.
             $headings->each(function ($heading, $key) use (&$tocArray) {
                 // Check, if the heading isn't empty or if the content type is really text
-                if (! isset($heading['content']) || $heading['content'][0]['type'] !== 'text') {
+                if (! isset($heading['content']) || empty($heading['content']) || $heading['content'][0]['type'] !== 'text') {
                     return;
                 }
 
