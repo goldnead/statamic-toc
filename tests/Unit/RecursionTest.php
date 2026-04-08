@@ -14,10 +14,28 @@ class RecursionTest extends TestCase
     }
 
     /** @test */
+    public function it_renders_toc_without_when_via_antlers()
+    {
+        $content = '<h1>Heading 1</h1><h2>Heading 2</h2>';
+
+        $template = <<<'EOT'
+{{ toc :content="content" }}
+<li>{{ toc_title }}</li>
+{{ /toc }}
+EOT;
+
+        $data = ['content' => $content];
+
+        $output = (string) Antlers::parse($template, $data);
+
+        $this->assertStringContainsString('Heading 1', $output);
+    }
+
+    /** @test */
     public function it_renders_toc_with_when_param()
     {
         $content = '<h1>Heading 1</h1><h2>Heading 2</h2>';
-        
+
         $template = <<<'EOT'
     <ol>
     {{ toc :content="content" :when="show_toc" }}
@@ -41,7 +59,7 @@ EOT;
         $output = (string) Antlers::parse($template, $data);
 
         $this->assertStringContainsString('Heading 1', $output);
-        
+
         // Test false
         $data['show_toc'] = false;
         $output = (string) Antlers::parse($template, $data);
