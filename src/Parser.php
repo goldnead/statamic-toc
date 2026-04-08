@@ -440,19 +440,20 @@ class Parser
             return true;
         }
 
-        try {
-            if (preg_match($this->exclude, '') !== false) {
-                // it's a valid regex
+        // Treat as regex only when it looks like a delimited pattern (e.g. /foo/i).
+        // This avoids calling preg_match on plain strings, which would emit warnings.
+        if (preg_match('/^([^\w\s\\\\])[^\1]*\1[gimsuy]*$/', $this->exclude)) {
+            try {
                 return ! preg_match($this->exclude, $title);
+            } catch (\Throwable $e) {
+                // Invalid regex — fall through to string match
             }
-        } catch (\Throwable $e) {
-            // not a valid regex, fall through to string match
         }
 
-        // fallback to simple string contains
-        $excluded = explode(',', $this->exclude);
-        foreach ($excluded as $exc) {
-            if (stripos($title, trim($exc)) !== false) {
+        // Comma-separated string match; skip empty tokens to avoid matching everything
+        foreach (explode(',', $this->exclude) as $exc) {
+            $exc = trim($exc);
+            if ($exc !== '' && stripos($title, $exc) !== false) {
                 return false;
             }
         }

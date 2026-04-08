@@ -64,6 +64,10 @@ class Toc extends Tags
 
         $isFlat = $this->params->bool("is_flat");
         $exclude = $this->params->get("exclude");
+        if ($exclude instanceof \Statamic\Fields\Value) {
+            $exclude = $exclude->raw();
+        }
+        $exclude = $exclude ? (string) $exclude : null;
 
         // create parser and generate TOC items
         $toc = new Parser($raw);
