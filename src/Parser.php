@@ -131,10 +131,11 @@ class Parser
             $start = 6;
         }
 
+        $currentDepth = $this->maxLevel - $this->minLevel + 1;
         $this->minLevel = $start;
-        // our depth is relative to the minLevel. So we need to update is if
+        // our depth is relative to the minLevel. So we need to update it if
         // the minLevel changes
-        $this->depth($this->maxLevel);
+        $this->depth($currentDepth);
 
         return $this;
     }
@@ -306,7 +307,7 @@ class Parser
         $this->collectHeadingsRecursively($raw);
 
         if (empty($this->headings)) {
-            return $this->supplementExtraOutput([]);
+            return [];
         }
 
         // get root & max level info
@@ -388,7 +389,7 @@ class Parser
             if ($level >= $this->minLevel && $level <= $this->maxLevel) {
                 $title = $this->normalizeHeadingText($items['content'] ?? []);
 
-                if ($this->shouldIncludeHeading($title)) {
+                if ($title !== '' && $this->shouldIncludeHeading($title)) {
                     $this->headings[] = [
                         'toc_title' => $title,
                         'level' => (int) $level,
@@ -439,9 +440,13 @@ class Parser
             return true;
         }
 
-        if (@preg_match($this->exclude, '') !== false) {
-            // it's a valid regex
-            return ! preg_match($this->exclude, $title);
+        try {
+            if (preg_match($this->exclude, '') !== false) {
+                // it's a valid regex
+                return ! preg_match($this->exclude, $title);
+            }
+        } catch (\Throwable $e) {
+            // not a valid regex, fall through to string match
         }
 
         // fallback to simple string contains
