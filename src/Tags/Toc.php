@@ -40,6 +40,12 @@ class Toc extends Tags
 
         $content = $this->params->get("content");
 
+        // Statamic 5+ runtime Antlers passes dynamic params as Value objects.
+        // Unwrap so the Parser receives a raw string or Bard array.
+        if ($content instanceof \Statamic\Fields\Value) {
+            $content = $content->raw();
+        }
+
         if (!$content && !$this->context->get($field)) {
             // return an empty array so the $this->count() function works properly
             return [];
