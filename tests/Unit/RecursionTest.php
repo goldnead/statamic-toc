@@ -20,7 +20,7 @@ class RecursionTest extends TestCase
         
         $template = <<<'EOT'
     <ol>
-    {{ toc field="content" :when="show_toc" }}
+    {{ toc :content="content" :when="show_toc" }}
         <li>
             <a href="#{{ toc_id }}">{{ toc_title }}</a>
             {{ if children }}
