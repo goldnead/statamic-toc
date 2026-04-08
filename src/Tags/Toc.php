@@ -26,7 +26,11 @@ class Toc extends Tags
      */
     public function index()
     {
-        if (!$this->params->bool('when', true)) {
+        $when = $this->params->get('when', true);
+        if ($when instanceof \Statamic\Fields\Value) {
+            $when = $when->raw();
+        }
+        if ($when === false || $when === 'false' || $when === 0 || $when === '0') {
             return [];
         }
         
