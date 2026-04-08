@@ -20,6 +20,8 @@ class Parser
     private $minLevel = 1;
 
     private $headings = [];
+    
+    private $exclude;
 
     private $isFlat = false;
 
@@ -129,16 +131,30 @@ class Parser
             $start = 6;
         }
 
+        $currentDepth = $this->maxLevel - $this->minLevel + 1;
         $this->minLevel = $start;
-        // our depth is relative to the minLevel. So we need to update is if
+        // our depth is relative to the minLevel. So we need to update it if
         // the minLevel changes
-        $this->depth($this->maxLevel);
+        $this->depth($currentDepth);
 
         return $this;
     }
 
     /**
-     * Sets a marker so the list won't be proicessed recursively.
+     * Set the exclusion pattern
+     * 
+     * @param string|null $exclude
+     * @return $this
+     */
+    public function exclude($exclude)
+    {
+        $this->exclude = $exclude;
+
+        return $this;
+    }
+
+    /**
+     * Sets a marker so the list won't be processed recursively.
      *
      * @return $this
      */
@@ -282,30 +298,16 @@ class Parser
     private function generateFromStructure($structure = null): array
     {
         // create a collection with the content array
-        $raw = ! $structure ? collect($this->content) : collect($structure);
+        $raw = ! $structure ? $this->content : $structure;
 
-        // filter out all the headings
-        $headings = $raw->filter(function ($item) {
-            return is_array($item) && $item['type'] === 'heading' && $item['attrs']['level'] >= $this->minLevel && $item['attrs']['level'] <= $this->maxLevel;
-        });
+        if (! is_array($raw)) {
+            return [];
+        }
 
-        if ($headings->count() > 0) {
-            // iterate through each heading and push its information into
-            // an array.
-            $headings->each(function ($heading, $key) use (&$tocArray) {
-                // Check, if the heading isn't empty or if the content type is really text
-                if (! isset($heading['content']) || $heading['content'][0]['type'] !== 'text') {
-                    return;
-                }
+        $this->collectHeadingsRecursively($raw);
 
-                $title = $heading['content'][0]['text'];
-                $this->headings[] = [
-                    'toc_title' => $title,
-                    'level' => $heading['attrs']['level'],
-                    'toc_id' => $this->generateId($title, true),
-                ];
-                $this->headings[count($this->headings) - 1]['id'] = count($this->headings);
-            });
+        if (empty($this->headings)) {
+            return [];
         }
 
         // get root & max level info
@@ -361,6 +363,102 @@ class Parser
 
         // return flat array if flag is true, nest it if not
         return $this->isFlat ? $this->headings : $this->nestHeadings();
+    }
+
+    /**
+     * Recursive function to collect headings from a Bard/Structure array.
+     */
+    private function collectHeadingsRecursively($items)
+    {
+        if (! is_array($items)) {
+            return;
+        }
+
+        // If it's a sequential array (a list of nodes or sets)
+        if (isset($items[0])) {
+            foreach ($items as $item) {
+                $this->collectHeadingsRecursively($item);
+            }
+
+            return;
+        }
+
+        // Processing a single node or set (keyed array)
+        if (isset($items['type']) && $items['type'] === 'heading') {
+            $level = $items['attrs']['level'] ?? 0;
+            if ($level >= $this->minLevel && $level <= $this->maxLevel) {
+                $title = $this->normalizeHeadingText($items['content'] ?? []);
+
+                if ($title !== '' && $this->shouldIncludeHeading($title)) {
+                    $this->headings[] = [
+                        'toc_title' => $title,
+                        'level' => (int) $level,
+                        'toc_id' => $this->generateId($title, true),
+                        'id' => count($this->headings) + 1,
+                    ];
+                }
+            }
+        }
+
+        // Recurse into all properties that are arrays (except 'attrs' unless it's a set)
+        foreach ($items as $key => $value) {
+            if (! is_array($value)) {
+                continue;
+            }
+
+            if ($key === 'attrs' && isset($items['type']) && $items['type'] !== 'set') {
+                continue;
+            }
+
+            $this->collectHeadingsRecursively($value);
+        }
+    }
+
+    /**
+     * Normalizes heading text by concatenating all text segments.
+     */
+    private function normalizeHeadingText(array $content): string
+    {
+        $text = '';
+        foreach ($content as $node) {
+            if (isset($node['text'])) {
+                $text .= $node['text'];
+            } elseif (isset($node['content'])) {
+                $text .= $this->normalizeHeadingText($node['content']);
+            }
+        }
+
+        return trim($text);
+    }
+
+    /**
+     * Checks if a heading should be included based on the exclusion pattern.
+     */
+    private function shouldIncludeHeading(string $title): bool
+    {
+        if (! $this->exclude) {
+            return true;
+        }
+
+        // Treat as regex only when it looks like a delimited pattern (e.g. /foo/i).
+        // This avoids calling preg_match on plain strings, which would emit warnings.
+        if (preg_match('/^([^\w\s\\\\])[^\1]*\1[gimsuy]*$/', $this->exclude)) {
+            try {
+                return ! preg_match($this->exclude, $title);
+            } catch (\Throwable $e) {
+                // Invalid regex — fall through to string match
+            }
+        }
+
+        // Comma-separated string match; skip empty tokens to avoid matching everything
+        foreach (explode(',', $this->exclude) as $exc) {
+            $exc = trim($exc);
+            if ($exc !== '' && stripos($title, $exc) !== false) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

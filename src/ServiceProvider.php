@@ -15,4 +15,8 @@ class ServiceProvider extends AddonServiceProvider
     protected $modifiers = [
         TocModifier::class,
     ];
+
+    protected $publishables = [
+        __DIR__.'/../resources/views' => 'resources/views/vendor/statamic-toc',
+    ];
 }
