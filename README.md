@@ -32,13 +32,35 @@ This addon generates a Table-Of-Contents (ToC) for any Bard- or Markdown-Field i
 
 Sweet, isn't it?
 
-### NEW: Styled Starter Kit included!
-If you're using Tailwind CSS, you can use our built-in **Starter Kit** partial to get a beautiful, responsive ToC immediately. Just include it in your template:
+### Tailwind CSS Starter Kit
+A pre-built, annotated Tailwind CSS partial is included to get you started quickly.
 
-```html
-{{ partial src="statamic-toc::starter-kit" }}
+**Basic usage** (reads the default `article` Bard field):
+```antlers
+{{ partial:goldnead/statamic-toc::starter-kit }}
 ```
-*(Note: Make sure your Tailwind configuration includes your addon's view folder)*
+
+**With options:**
+```antlers
+{{ partial:goldnead/statamic-toc::starter-kit
+    field="content"
+    depth="3"
+    from="h2"
+    title="On this page"
+    exclude="Introduction, Footer"
+}}
+```
+
+To customise the markup, publish the view to your project:
+```bash
+php artisan vendor:publish --tag=statamic-toc
+```
+This copies the partial to `resources/views/vendor/statamic-toc/starter-kit.antlers.html`.
+
+> **Tailwind note:** add the addon's view path to your `tailwind.config.js` content sources so Tailwind picks up the classes:
+> ```js
+> './addons/goldnead/statamic-toc/resources/views/**/*.html'
+> ```
 
 ## Installation
 

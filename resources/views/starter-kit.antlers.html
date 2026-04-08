@@ -1,0 +1,120 @@
+{{#
+    Statamic ToC — Starter Kit Partial
+    ===================================
+    A ready-to-use, Tailwind CSS styled Table of Contents component.
+    Copy this file to your project's views or publish it with:
+
+        php artisan vendor:publish --tag=statamic-toc
+
+    USAGE
+    -----
+    Basic (reads the default "article" Bard field from current context):
+
+        {{ partial:goldnead/statamic-toc::starter-kit }}
+
+    With options:
+
+        {{ partial:goldnead/statamic-toc::starter-kit
+            field="content"
+            depth="3"
+            from="h2"
+            title="On this page"
+        }}
+
+    PARAMETERS
+    ----------
+    field  — Name of the Bard field to parse. Default: "article"
+    depth  — How many heading levels deep to show. Default: 3
+    from   — The heading level to start from (h1–h6). Default: "h1"
+    title  — Label shown above the list. Default: "Table of Contents"
+    exclude — Comma-separated string or regex of headings to skip. Default: none
+              Examples:  exclude="Introduction, Footer"
+                         exclude="/^Appendix/i"
+#}}
+
+{{# Resolve parameters with sensible defaults #}}
+{{ field    = field    ?? "article" }}
+{{ depth    = depth    ?? 3 }}
+{{ from     = from     ?? "h1" }}
+{{ toc_title_label = title ?? "Table of Contents" }}
+
+{{# Only render if there are headings to show #}}
+{{ toc:count :field="field" :depth="depth" :from="from" :exclude="exclude" }}
+    {{ if toc:count > 0 }}
+
+<nav id="statamic-toc" aria-label="{{ toc_title_label }}">
+
+    {{# =====================================================================
+        HEADER
+        You can replace the icon, title, and count badge with anything you like.
+        The count uses the same depth/from/field params as the list below.
+    ===================================================================== #}}
+    <div class="flex items-center justify-between mb-4">
+
+        <div class="flex items-center gap-2">
+            {{# List icon — swap out for any Heroicon or your own SVG #}}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10m-10 6h7" />
+            </svg>
+            <span class="text-base font-semibold text-slate-800">{{ toc_title_label }}</span>
+        </div>
+
+        {{# Section count badge — driven by the same params as the list #}}
+        <span class="text-xs font-medium text-slate-400 tabular-nums">
+            {{ toc:count :field="field" :depth="depth" :from="from" :exclude="exclude" }} sections
+        </span>
+
+    </div>
+
+    {{# =====================================================================
+        TOC LIST
+        {{ toc }} loops over top-level headings. Each item exposes:
+            toc_title     — the heading text
+            toc_id        — the slug-based anchor (matches {{ toc:inject_ids }})
+            level         — heading depth: 1 = outermost, 2 = child, etc.
+            has_children  — boolean
+            children      — nested array of the same shape
+            is_root       — true for top-level items
+            parent        — id of the parent heading (null for root)
+
+        {{ *recursive children* }} re-runs this same template block for
+        nested headings, so the indentation and styling below applies at
+        every depth automatically.
+    ===================================================================== #}}
+
+    <ol role="list" class="space-y-0.5 text-sm">
+
+        {{ toc :field="field" :depth="depth" :from="from" :exclude="exclude" }}
+
+            <li>
+                <a href="#{{ toc_id }}"
+                   class="flex items-baseline gap-2 py-1.5 px-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors no-underline
+                          {{ if level == 1 }}font-medium{{ else }}font-normal{{ /if }}">
+
+                    {{# Depth indicator — level 1 is bold, deeper levels indent #}}
+                    {{ if level > 1 }}
+                        <span class="flex-shrink-0 text-slate-300 select-none" aria-hidden="true">
+                            {{ level == 2 ?= "–" }}{{ level == 3 ?= "·" }}{{ level >= 4 ?= "·" }}
+                        </span>
+                    {{ /if }}
+
+                    <span>{{ toc_title }}</span>
+                </a>
+
+                {{# Recurse into children if they exist.
+                    Remove this block to render a flat list instead. #}}
+                {{ if children }}
+                    <ol role="list" class="ml-4 space-y-0.5">
+                        {{ *recursive children* }}
+                    </ol>
+                {{ /if }}
+            </li>
+
+        {{ /toc }}
+
+    </ol>
+
+</nav>
+
+    {{ /if }}
+{{ /toc:count }}
