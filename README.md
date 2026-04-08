@@ -32,6 +32,14 @@ This addon generates a Table-Of-Contents (ToC) for any Bard- or Markdown-Field i
 
 Sweet, isn't it?
 
+### NEW: Styled Starter Kit included!
+If you're using Tailwind CSS, you can use our built-in **Starter Kit** partial to get a beautiful, responsive ToC immediately. Just include it in your template:
+
+```html
+{{ partial src="statamic-toc::starter-kit" }}
+```
+*(Note: Make sure your Tailwind configuration includes your addon's view folder)*
+
 ## Installation
 
 Install via composer:
@@ -203,7 +211,27 @@ You can control the behaviour with the following tag-parameters:
 | `is_flat` | When true the list will be displayed as a flat array without nested `children` | _(boolean)_ `false`          |
 | `field`   | The name of the bard-field.                                                    | _(string)_ `"article"`       |
 | `content` | Content of the bard-structure or HTML String                                   | _(string/array/null)_ `null` |
-| `from`    | The starting point from where the list shohuld be outputted                    | _(string)_ `h1`              |
+| `from`    | The starting point from where the list should be outputted                     | _(string)_ `h1`              |
+| `exclude` | Regex or comma-separated string of headings to ignore                         | _(string)_ `null`            |
+
+## Advanced Features
+
+### Deep Bard Scan (Recursive)
+This addon now recursively scans your Bard field for headings. This means even if you have headings inside sets (like a "Two Columns" set or a "Quote" set), they will be automatically detected and added to the ToC. This is the default behavior and requires no configuration.
+
+### Heading Normalization
+We now support headings with rich formatting (bold, italics, links, etc.). The ToC will automatically concatenate all text segments into a clean title.
+
+### Exclusion Logic
+You can hide specific headings from the ToC using the `exclude` parameter. It supports both raw strings (separated by commas) and regular expressions:
+
+```html
+{{# Exclude by string snippets #}}
+{{ toc exclude="Contact, Footer" }}
+
+{{# Exclude using regex #}}
+{{ toc exclude="/^Introduction/i" }}
+```
 
 ## License
 

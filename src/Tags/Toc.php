@@ -63,11 +63,13 @@ class Toc extends Tags
         }
 
         $isFlat = $this->params->bool("is_flat");
+        $exclude = $this->params->get("exclude");
 
         // create parser and generate TOC items
         $toc = new Parser($raw);
         $toc->depth($depth)
             ->from($start)
+            ->exclude($exclude)
             ->flattenIf($isFlat);
 
         return $this->output(
