@@ -26,6 +26,16 @@ class Toc extends Tags
      */
     public function index()
     {
+        $when = $this->params->get('when', true);
+        if ($when instanceof \Statamic\Fields\Value) {
+            $when = $when->raw();
+        }
+        if ($when === false || $when === 'false' || $when === 0 || $when === '0') {
+            return [];
+        }
+        
+        // get the supported header-levels
+
         // get the supported header-levels
         $depth = $this->params->int("depth", 3);
         $start = $this->params->get('from', "h1");
@@ -33,6 +43,12 @@ class Toc extends Tags
         $field = $this->params->get("field", "article");
 
         $content = $this->params->get("content");
+
+        // Statamic 5+ runtime Antlers passes dynamic params as Value objects.
+        // Unwrap so the Parser receives a raw string or Bard array.
+        if ($content instanceof \Statamic\Fields\Value) {
+            $content = $content->raw();
+        }
 
         if (!$content && !$this->context->get($field)) {
             // return an empty array so the $this->count() function works properly

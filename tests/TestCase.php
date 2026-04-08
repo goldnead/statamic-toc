@@ -21,12 +21,15 @@ class TestCase extends OrchestraTestCase
     {
         parent::getEnvironmentSetUp($app);
 
-        $app->make(Manifest::class)->manifest = [
-            'goldnead/statamic-toc' => [
-                'id' => 'goldnead/statamic-toc',
-                'namespace' => 'Goldnead\\StatamicToc\\',
-            ],
-        ];
+        // Manifest was removed in Statamic 6
+        if (class_exists(Manifest::class)) {
+            $app->make(Manifest::class)->manifest = [
+                'goldnead/statamic-toc' => [
+                    'id' => 'goldnead/statamic-toc',
+                    'namespace' => 'Goldnead\\StatamicToc\\',
+                ],
+            ];
+        }
     }
 
     protected function getPackageProviders($app)
