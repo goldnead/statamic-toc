@@ -26,7 +26,7 @@ class Toc extends Tags
      */
     public function index()
     {
-        if ($this->params->get('when', true) === false) {
+        if (!$this->params->bool('when', true)) {
             return [];
         }
         
