@@ -21,6 +21,57 @@ class TagTest extends TestCase
   }
 
   /** @test */
+  public function when_false_returns_empty_array()
+  {
+    $this->tag->setParameters([
+      'content' => $this->fakeHTMLContent(2, 3),
+      'when' => false,
+    ]);
+    $this->assertSame([], $this->tag->index());
+  }
+
+  /** @test */
+  public function when_string_false_returns_empty_array()
+  {
+    // Antlers dynamic binding (:when="$condition") can deliver the value as
+    // the string "false" rather than a boolean — this was the bug in issue #28.
+    $this->tag->setParameters([
+      'content' => $this->fakeHTMLContent(2, 3),
+      'when' => 'false',
+    ]);
+    $this->assertSame([], $this->tag->index());
+  }
+
+  /** @test */
+  public function when_true_outputs_items()
+  {
+    $this->tag->setParameters([
+      'content' => $this->fakeHTMLContent(2, 3),
+      'when' => true,
+    ]);
+    $this->assertNotEmpty($this->tag->index());
+  }
+
+  /** @test */
+  public function when_string_true_outputs_items()
+  {
+    $this->tag->setParameters([
+      'content' => $this->fakeHTMLContent(2, 3),
+      'when' => 'true',
+    ]);
+    $this->assertNotEmpty($this->tag->index());
+  }
+
+  /** @test */
+  public function when_omitted_outputs_items()
+  {
+    $this->tag->setParameters([
+      'content' => $this->fakeHTMLContent(2, 3),
+    ]);
+    $this->assertNotEmpty($this->tag->index());
+  }
+
+  /** @test */
   public function tag_outputs_array()
   {
     $this->tag->setParameters([
