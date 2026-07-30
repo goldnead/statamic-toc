@@ -204,6 +204,33 @@ Example:
 {{ /if }}
 ```
 
+### Excluding headings
+
+Pass `exclude` to leave individual headings out of the list. A comma-separated string matches
+case-insensitively on any part of the heading text:
+
+```
+{{ toc exclude="Introduction, Footnotes" }}
+```
+
+A delimited pattern is treated as a regular expression:
+
+```
+{{ toc exclude="/^Appendix/i" }}
+```
+
+The excluded headings still receive their IDs from the modifier, they are only omitted from the list.
+
+### Conditional output
+
+`when` switches the tag off without removing it from the template:
+
+```
+{{ toc :when="show_toc" }}
+```
+
+When it evaluates to `false`, the tag returns an empty list and `no_results` is true.
+
 ### Variables
 
 Every Item has the following variables at your disposal:
@@ -236,7 +263,9 @@ You can control the behaviour with the following tag-parameters:
 | `is_flat` | When true the list will be displayed as a flat array without nested `children` | _(boolean)_ `false`          |
 | `field`   | The name of the bard-field.                                                    | _(string)_ `"article"`       |
 | `content` | Content of the bard-structure or HTML String                                   | _(string/array/null)_ `null` |
-| `from`    | The starting point from where the list shohuld be outputted                    | _(string)_ `h1`              |
+| `from`    | The starting point from where the list should be outputted                     | _(string)_ `h1`              |
+| `exclude` | Comma-separated headings or a regex pattern to omit from the list              | _(string/null)_ `null`       |
+| `when`    | Returns an empty list when this evaluates to false                             | _(bool)_ `true`              |
 
 ## License
 

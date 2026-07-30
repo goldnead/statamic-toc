@@ -2,7 +2,22 @@
 
 All notable changes to `statamic-toc` will be documented in this file.
 
-## ???-??-?? v1.05
+## 2026-07-30 v1.9
+
+- Headings inside nested Bard sets (columns, grids, replicators) are now found. Previously only
+  top-level nodes were scanned.
+- Headings with inline formatting (bold, italic, links) keep their full text. Before, a heading
+  starting with a mark was dropped entirely and a heading containing one was cut short (#26).
+- Malformed Bard nodes no longer cause fatal errors: missing `attrs`, missing, empty or
+  non-array `content`, and non-numeric levels are skipped instead.
+- `from()` no longer expands the depth when called after `depth()` or called twice.
+- New `exclude` parameter on the tag: comma-separated headings or a regex pattern.
+- Headings that normalize to an empty string are left out of the list.
+- Test suite: three test classes were silently skipped on PHPUnit 12 because doc-comment
+  annotations are no longer read. Method names now carry the `test_` prefix, which works on
+  every supported PHPUnit version.
+
+## 2026-04-08 v1.8
 
 - Support for Statamic v6
 
