@@ -219,6 +219,17 @@ instead of publishing it, add the addon path to the content sources in your Tail
 The partial only renders the list. The anchors point at the IDs the modifier injects, so the content
 field itself still needs `{{ your_field | toc }}`.
 
+### Heading levels
+
+`from` is the level the list starts at, `to` the level it stops at, both absolute:
+
+```
+{{ toc from="h2" to="h4" }}
+```
+
+`depth` says the same thing relative to `from`, and is what most templates use. `from="h2"` with
+`depth="3"` covers h2 to h4. When both `to` and `depth` are given, `to` wins.
+
 ### Excluding headings
 
 Pass `exclude` to leave individual headings out of the list. A comma-separated string matches
@@ -248,8 +259,8 @@ When it evaluates to `false`, the tag returns an empty list and `no_results` is 
 
 ### The `toc:count` Tag
 
-Returns the number of headings found. Pass it the same `field`, `depth` and `from` parameters as
-the list itself, otherwise it counts a different set:
+Returns the number of headings the list would show. Give it the same parameters as the list, and
+it reports the same number:
 
 ```
 {{ if {toc:count field="article" depth="3"} > 0 }}
@@ -289,7 +300,8 @@ You can control the behaviour with the following tag-parameters:
 | `is_flat` | When true the list will be displayed as a flat array without nested `children` | _(boolean)_ `false`          |
 | `field`   | The name of the bard-field.                                                    | _(string)_ `"article"`       |
 | `content` | Content of the bard-structure or HTML String                                   | _(string/array/null)_ `null` |
-| `from`    | The starting point from where the list should be outputted                     | _(string)_ `h1`              |
+| `from`    | The level the list starts at                                                    | _(string)_ `h1`              |
+| `to`      | The level the list stops at, absolute. Wins over `depth`                       | _(string/null)_ `null`       |
 | `exclude` | Comma-separated headings or a regex pattern to omit from the list              | _(string/null)_ `null`       |
 | `when`    | Returns an empty list when this evaluates to false                             | _(bool)_ `true`              |
 

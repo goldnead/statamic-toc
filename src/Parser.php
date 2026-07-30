@@ -14,15 +14,9 @@ class Parser
 {
     private $content;
 
-    private $maxLevel = 3;
-
-    private $minLevel = 1;
-
     private $headings = [];
-    
-    private $exclude;
 
-    private $isFlat = false;
+    private Options $options;
 
     /**
      * Constructor.
@@ -31,9 +25,22 @@ class Parser
      */
     public function __construct($content = null)
     {
+        $this->options = Options::default();
+
         if ($content) {
             $this->setContent($content);
         }
+
+        return $this;
+    }
+
+    /**
+     * Replaces the whole option set at once. The fluent setters below stay for
+     * anyone driving the parser directly.
+     */
+    public function options(Options $options): self
+    {
+        $this->options = $options;
 
         return $this;
     }
@@ -88,14 +95,28 @@ class Parser
     }
 
     /**
-     * Sets the given List-Depth
+     * How many levels the list spans, counted from the starting level.
      *
      * @param  int  $depth
      * @return $this
      */
     public function depth($depth)
     {
-        $this->maxLevel = $depth + $this->minLevel - 1;
+        $this->options = $this->options->withDepth((int) $depth);
+
+        return $this;
+    }
+
+    /**
+     * The deepest level the list shows, as an absolute level. Says the same
+     * thing as depth() without the arithmetic.
+     *
+     * @param  string|int  $level
+     * @return $this
+     */
+    public function to($level)
+    {
+        $this->options = $this->options->withTo($level);
 
         return $this;
     }
@@ -108,22 +129,7 @@ class Parser
      */
     public function from($start)
     {
-        // parse string if it has the syntax "h(int)" (eg. h2)
-        if (is_string($start)) {
-            $start = intval(ltrim($start, 'h'));
-        }
-        // reset starting value if it is below or above the supported ones
-        if ($start < 1) {
-            $start = 1;
-        } elseif ($start > 6) {
-            $start = 6;
-        }
-
-        $currentDepth = $this->maxLevel - $this->minLevel + 1;
-        $this->minLevel = $start;
-        // our depth is relative to the minLevel. So we need to update it if
-        // the minLevel changes
-        $this->depth($currentDepth);
+        $this->options = $this->options->withFrom($start);
 
         return $this;
     }
@@ -136,7 +142,7 @@ class Parser
      */
     public function exclude($exclude)
     {
-        $this->exclude = $exclude;
+        $this->options = $this->options->withExclude($exclude);
 
         return $this;
     }
@@ -148,19 +154,10 @@ class Parser
      */
     public function flatten()
     {
-        $this->isFlat = true;
+        $this->options = $this->options->withFlat();
 
         return $this;
     }
-
-    /**
-     * Stops the recursion at the given level.
-     * TODO/FEATURE/WHY?
-     *
-     * @param [type] $level
-     * @return void
-     */
-    public function flattenFrom($level) {}
 
     /**
      * Sets the flattening only if the given parameter is true.
@@ -226,7 +223,7 @@ class Parser
     private function assemble(array $extracted, array $anchors): array
     {
         foreach ($extracted as $index => $heading) {
-            if ($heading->level < $this->minLevel || $heading->level > $this->maxLevel) {
+            if (! $this->options->covers($heading->level)) {
                 continue;
             }
 
@@ -302,7 +299,7 @@ class Parser
         }
 
         // return flat array if flag is true, nest it if not
-        return $this->isFlat ? $this->headings : $this->nestHeadings();
+        return $this->options->flat ? $this->headings : $this->nestHeadings();
     }
 
     /**
@@ -310,22 +307,22 @@ class Parser
      */
     private function shouldIncludeHeading(string $title): bool
     {
-        if (! $this->exclude) {
+        if (! $this->options->exclude) {
             return true;
         }
 
         // Treat as regex only when it looks like a delimited pattern (e.g. /foo/i).
         // This avoids calling preg_match on plain strings, which would emit warnings.
-        if (preg_match('/^([^\w\s\\\\])[^\1]*\1[gimsuy]*$/', $this->exclude)) {
+        if (preg_match('/^([^\w\s\\\\])[^\1]*\1[gimsuy]*$/', $this->options->exclude)) {
             try {
-                return ! preg_match($this->exclude, $title);
+                return ! preg_match($this->options->exclude, $title);
             } catch (\Throwable $e) {
                 // Invalid regex — fall through to string match
             }
         }
 
         // Comma-separated string match; skip empty tokens to avoid matching everything
-        foreach (explode(',', $this->exclude) as $exc) {
+        foreach (explode(',', $this->options->exclude) as $exc) {
             $exc = trim($exc);
             if ($exc !== '' && stripos($title, $exc) !== false) {
                 return false;

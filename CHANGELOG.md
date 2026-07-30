@@ -34,6 +34,16 @@ All notable changes to `statamic-toc` will be documented in this file.
   invalid HTML and left the anchor pointing nowhere.
 - Excluding a heading from the list no longer changes the anchors of the
   others.
+- New `to` parameter on the tag, an absolute level: `{{ toc from="h2" to="h4" }}`.
+  `depth` keeps working and says the same thing relative to `from`; when both
+  are given, `to` wins.
+- **Breaking:** `{{ toc:count }}` counts what the list shows. It used to force
+  the depth to 6 and report a different number than the list right underneath
+  it. Templates that relied on the old number to ask "are there any headings at
+  all" want `{{ toc:count depth="6" }}`.
+- Options live in one immutable `Options` object instead of two mutable level
+  fields recomputed from each other. `Parser::flattenFrom()`, an empty stub
+  marked TODO since 2021, is gone.
 
 ## 2026-07-30 v1.9
 
