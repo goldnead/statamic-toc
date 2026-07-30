@@ -290,6 +290,8 @@ class Parser
             return is_array($item)
                 && isset($item['type'])
                 && $item['type'] === 'heading'
+                && isset($item['attrs'])
+                && is_array($item['attrs'])
                 && isset($item['attrs']['level'])
                 && $item['attrs']['level'] >= $this->minLevel
                 && $item['attrs']['level'] <= $this->maxLevel;

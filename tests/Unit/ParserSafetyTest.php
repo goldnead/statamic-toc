@@ -114,6 +114,29 @@ class ParserSafetyTest extends TestCase
     }
 
     /** @test */
+    public function test_handles_object_attrs()
+    {
+        // A malformed Bard node whose 'attrs' is an object (stdClass) instead
+        // of an array must not crash on the isset($item['attrs']['level']) check
+        // with "Cannot use object of type stdClass as array".
+        $attrs = new \stdClass;
+        $attrs->level = 2;
+
+        $content = [
+            [
+                'type' => 'heading',
+                'attrs' => $attrs,
+                'content' => [['type' => 'text', 'text' => 'Test']],
+            ],
+        ];
+
+        $result = (new Parser($content))->build();
+
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['total_results']);
+    }
+
+    /** @test */
     public function test_handles_content_first_element_missing_text_key()
     {
         $content = [

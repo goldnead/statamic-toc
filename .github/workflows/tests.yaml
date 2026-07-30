@@ -37,6 +37,12 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
 
       - name: Install dependencies
+        # Laravel < 12 carries unpatched security advisories that Composer 2.x
+        # refuses to install by default (policy blocking). CI runs in a
+        # throwaway environment, so disabling the block is safe here and lets
+        # the Laravel 10 / Statamic 5 leg resolve.
+        env:
+          COMPOSER_NO_BLOCKING: "1"
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" "statamic/cms:${{ matrix.statamic }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer install --no-interaction
