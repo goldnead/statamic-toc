@@ -23,6 +23,17 @@ All notable changes to `statamic-toc` will be documented in this file.
 - Dropped `mb_convert_encoding(..., 'HTML-ENTITIES', ...)`, deprecated since
   PHP 8.2, and `CommonMarkConverter::convertToHtml()`, deprecated in
   league/commonmark 2.
+- The tag and the modifier now read their anchors from one shared registry
+  instead of each running its own slug pass. Four defects go away with it:
+  headings below the third level get ids; a `from` above a repeated heading no
+  longer shifts the anchors under it; a hand-written id is used by the list
+  instead of being slugged past; and two modifier calls on one page stop
+  renumbering each other.
+- A heading that already carries an id keeps exactly that one. The old check
+  missed an id in the last attribute position and appended a second, which is
+  invalid HTML and left the anchor pointing nowhere.
+- Excluding a heading from the list no longer changes the anchors of the
+  others.
 
 ## 2026-07-30 v1.9
 

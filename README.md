@@ -130,6 +130,12 @@ Then you get something like this:
 
 !> Note: When headings are duplicated, the ID is suffixed with a number preventing duplicated IDs which would be semantially wrong in HTML.
 
+If a heading already has an ID, from Bard's anchor button or from hand-written HTML, that ID is
+kept and the table of contents links to it. The modifier never adds a second one.
+
+The tag and the modifier take their IDs from the same place, so the list and the headings always
+agree, whatever `from`, `depth` or `exclude` are set to.
+
 ### The `toc` Tag
 
 You can use the `toc`-Tag like you would use any recursive tag (like the `nav` Tag) in your Antler-Templates:

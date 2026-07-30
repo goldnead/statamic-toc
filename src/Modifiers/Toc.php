@@ -7,7 +7,9 @@
 
 namespace Goldnead\StatamicToc\Modifiers;
 
-use Goldnead\StatamicToc\Facades\ParserFacade as Parser;
+use Goldnead\StatamicToc\Anchors\IdInjector;
+use Goldnead\StatamicToc\Extractors\Detector;
+use Goldnead\StatamicToc\Registry;
 use Statamic\Modifiers\Modifier;
 
 class Toc extends Modifier
@@ -15,16 +17,29 @@ class Toc extends Modifier
     /**
      * Injects IDs into the DOM.
      *
+     * The anchors come from the shared registry, not from a second slug run of
+     * its own. That is the whole point: the tag and this modifier read the same
+     * decision, so an anchor cannot point at a heading that never got the id.
+     *
      * @param  mixed  $value    The value to be modified
      * @param  array  $params   Any parameters used in the modifier
      * @param  array  $context  Contextual values
      * @return mixed
      */
-    public function index($value, $params = [])
+    public function index($value, $params = [], $context = [])
     {
-        // initiate parser and let him inject ids into the DOM
-        $content = Parser::injectIds($value, empty($params) ? null : $params);
+        $html = (string) $value;
 
-        return $content;
+        if ($html === '') {
+            return $html;
+        }
+
+        $headings = (new Detector)->for($html)->extract($html);
+
+        return (new IdInjector)->inject(
+            $html,
+            app(Registry::class)->anchorsFor($headings),
+            empty($params) ? null : implode(' ', (array) $params)
+        );
     }
 }

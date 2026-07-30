@@ -18,6 +18,15 @@ class ServiceProvider extends AddonServiceProvider
 
     protected $viewNamespace = 'statamic-toc';
 
+    public function register()
+    {
+        parent::register();
+
+        // One registry per request, so the tag and the modifier land on the
+        // same anchors for the same document.
+        $this->app->singleton(Registry::class);
+    }
+
     public function bootAddon()
     {
         // Registered explicitly instead of relying on the automatic boot, which
