@@ -11,13 +11,38 @@ use Illuminate\Support\Str;
 
 class Parser
 {
+    /** How deep the *list* goes unless a template says otherwise. */
+    public const DEFAULT_MAX_LEVEL = 3;
+
+    public const DEFAULT_MIN_LEVEL = 1;
+
+    /**
+     * The deepest heading HTML has. Id injection always spans all of them,
+     * independently of how deep the list goes: a heading that is not in the
+     * list is harmless with an id on it, while one in the list without an id
+     * is a link that goes nowhere.
+     */
+    private const HTML_MAX_LEVEL = 6;
+
+    /**
+     * An `id` attribute already on the heading.
+     *
+     * The lookbehind is what keeps `data-id` and `aria-id` from counting, and
+     * the absence of a trailing `[\s>]` is the fix: the attribute list is
+     * matched without its closing `>`, so requiring a character after the
+     * quote missed an id written last — which is where people write it. The
+     * old pattern therefore appended a second id, and a browser keeps the
+     * first while the list linked to the second.
+     */
+    private const EXISTING_ID_PATTERN = '/(?<![\w-])id\s*=\s*(["\'])(.*?)\1/si';
+
     private $content;
 
     private $slugs = [];
 
-    private $maxLevel = 3;
+    private $maxLevel = self::DEFAULT_MAX_LEVEL;
 
-    private $minLevel = 1;
+    private $minLevel = self::DEFAULT_MIN_LEVEL;
 
     private $headings = [];
     
@@ -63,6 +88,15 @@ class Parser
         $this->slugs = collect();
         $this->headings = [];
         $this->content = $content;
+
+        // Every render starts from the defaults. The facade hands out one
+        // instance for the whole request, so without this a `depth="1"` on the
+        // first list silently narrowed every list and every id injection after
+        // it — a parameter set in one template affecting an unrelated one.
+        $this->maxLevel = self::DEFAULT_MAX_LEVEL;
+        $this->minLevel = self::DEFAULT_MIN_LEVEL;
+        $this->isFlat = false;
+        $this->exclude = null;
 
         return $this;
     }
@@ -265,6 +299,11 @@ class Parser
                 'type' => 'heading',
                 'attrs' => [
                     'level' => (int) ltrim($tag->nodeName, 'h'),
+                    // An id the author wrote by hand. The modifier leaves such
+                    // a heading alone, so the list has to link to that id
+                    // rather than to a slug of the title — otherwise the two
+                    // halves disagree and the anchor resolves to nothing.
+                    'id' => $tag->getAttribute('id') ?: null,
                 ],
                 'content' => [
                     [
@@ -392,10 +431,12 @@ class Parser
                 $title = is_array($content) ? $this->normalizeHeadingText($content) : '';
 
                 if ($title !== '' && $this->shouldIncludeHeading($title)) {
+                    $existingId = $items['attrs']['id'] ?? null;
+
                     $this->headings[] = [
                         'toc_title' => $title,
                         'level' => (int) $level,
-                        'toc_id' => $this->generateId($title, true),
+                        'toc_id' => $existingId ?: $this->generateId($title, true),
                         'id' => count($this->headings) + 1,
                     ];
                 }
@@ -500,14 +541,14 @@ class Parser
     {
         // Do all the regex magic here
         $injected = preg_replace_callback(
-            '#<(h[1-'.$this->maxLevel.'])(.*?)>(.*?)</\1>#si',
+            '#<(h[1-'.self::HTML_MAX_LEVEL.'])(.*?)>(.*?)</\1>#si',
             // callback
             function ($matches) use ($params) {
                 // the html tag
                 $tag = $matches[1];
                 // decode html entities to support special characters in headings/slug
                 $title = html_entity_decode(strip_tags($matches[3]));
-                $hasId = preg_match('/id=(["\'])(.*?)\1[\s>]/si', $matches[2], $matchedIds);
+                $hasId = preg_match(self::EXISTING_ID_PATTERN, $matches[2], $matchedIds);
                 $id = $hasId ? $matchedIds[2] : $this->generateId($title, false);
 
                 if ($hasId) {
