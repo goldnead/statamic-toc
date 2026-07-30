@@ -18,7 +18,6 @@ class RecursionTest extends TestCase
             ->setContext([]);
     }
 
-    /** @test */
     public function test_when_true_renders_toc()
     {
         $this->tag->setParameters([
@@ -31,7 +30,6 @@ class RecursionTest extends TestCase
         $this->assertEquals('Heading 1', $output[0]['toc_title']);
     }
 
-    /** @test */
     public function test_when_false_suppresses_toc()
     {
         $this->tag->setParameters([
@@ -42,7 +40,6 @@ class RecursionTest extends TestCase
         $this->assertSame([], $this->tag->index());
     }
 
-    /** @test */
     public function test_when_string_false_suppresses_toc()
     {
         $this->tag->setParameters([
@@ -53,7 +50,6 @@ class RecursionTest extends TestCase
         $this->assertSame([], $this->tag->index());
     }
 
-    /** @test */
     public function test_when_string_true_renders_toc()
     {
         $this->tag->setParameters([

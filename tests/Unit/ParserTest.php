@@ -9,7 +9,6 @@ class ParserTest extends TestCase
 {
     public $parser;
 
-    /** @test */
     public function test_can_detect_html()
     {
         $html = $this->fakeHTMLContent(2, 3);
@@ -21,7 +20,6 @@ class ParserTest extends TestCase
         $this->assertFalse($parser->isHTML($markdown));
     }
 
-    /** @test */
     public function test_can_detect_markdown()
     {
         $markdown = $this->fakeMarkdownContent(2, 3);
@@ -33,7 +31,6 @@ class ParserTest extends TestCase
         $this->assertFalse($parser->isMarkdown($html));
     }
 
-    /** @test */
     public function test_can_build_toc_tree_from_markdown()
     {
         $markdown = $this->fakeMarkdownContent(4, 3);
@@ -47,7 +44,6 @@ class ParserTest extends TestCase
         $this->assertEquals(1, count($tree[0]['children'][1]['children']));
     }
 
-    /** @test */
     public function test_can_create_toc_tree()
     {
         $html = $this->fakeHTMLContent(4, 3);
@@ -61,7 +57,6 @@ class ParserTest extends TestCase
         $this->assertEquals(1, count($tree[0]['children'][1]['children']));
     }
 
-    /** @test */
     public function test_can_flatten_toc_tree()
     {
         $html = $this->fakeHTMLContent(4, 3);
@@ -72,7 +67,6 @@ class ParserTest extends TestCase
         $this->assertEquals(5, count($tree));
     }
 
-    /** @test */
     public function test_can_flatten_toc_tree_with_depth()
     {
         $html = $this->fakeHTMLContent(4, 3);
@@ -83,8 +77,7 @@ class ParserTest extends TestCase
         $this->assertEquals(3, count($tree));
     }
 
-    /** @test */
-    public function can_build_tree_from_html()
+    public function test_can_build_tree_from_html()
     {
         $html = $this->fakeHTMLContent(4, 3);
         $html .= $this->fakeHTMLContent(2, 3, true, false);
@@ -97,7 +90,6 @@ class ParserTest extends TestCase
         $this->assertEquals(1, count($tree[0]['children'][1]['children']));
     }
 
-    /** @test */
     public function test_can_build_tree_from_bard()
     {
         $content = array_merge($this->fakeBardArray(4, 3), $this->fakeBardArray(2, 3, true, false));
@@ -110,7 +102,6 @@ class ParserTest extends TestCase
         $this->assertEquals(1, count($tree[0]['children'][1]['children']));
     }
 
-    /** @test */
     public function test_contains_total_results_and_no_results()
     {
         $html = $this->fakeHTMLContent(4, 3);
@@ -125,7 +116,6 @@ class ParserTest extends TestCase
         $this->assertEquals(true, $tree['no_results']);
     }
 
-    /** @test */
     public function test_array_tree_format_is_correct()
     {
         $content = array_merge($this->fakeBardArray(4, 3), $this->fakeBardArray(2, 3, true, false));
@@ -161,7 +151,6 @@ class ParserTest extends TestCase
         }
     }
 
-    /** @test */
     public function test_can_generate_ids()
     {
         $html = $this->fakeHTMLContent(4, 3);

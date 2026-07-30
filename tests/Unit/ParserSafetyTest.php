@@ -7,7 +7,6 @@ use Goldnead\StatamicToc\Tests\TestCase;
 
 class ParserSafetyTest extends TestCase
 {
-    /** @test */
     public function test_handles_heading_with_missing_attrs()
     {
         $content = [
@@ -24,7 +23,6 @@ class ParserSafetyTest extends TestCase
         $this->assertEquals(0, $result['total_results']);
     }
 
-    /** @test */
     public function test_handles_heading_with_missing_content()
     {
         $content = [
@@ -41,7 +39,6 @@ class ParserSafetyTest extends TestCase
         $this->assertEquals(0, $result['total_results']);
     }
 
-    /** @test */
     public function test_handles_heading_with_empty_content_array()
     {
         $content = [
@@ -58,7 +55,6 @@ class ParserSafetyTest extends TestCase
         $this->assertEquals(0, $result['total_results']);
     }
 
-    /** @test */
     public function test_handles_items_missing_type_key()
     {
         $content = [
@@ -77,7 +73,6 @@ class ParserSafetyTest extends TestCase
         $this->assertEquals(1, $result[0]['total_results']);
     }
 
-    /** @test */
     public function test_handles_content_first_element_not_array()
     {
         $content = [
@@ -94,7 +89,6 @@ class ParserSafetyTest extends TestCase
         $this->assertEquals(0, $result['total_results']);
     }
 
-    /** @test */
     public function test_handles_scalar_content()
     {
         // A malformed Bard node whose 'content' is a scalar (e.g. an int)
@@ -113,7 +107,6 @@ class ParserSafetyTest extends TestCase
         $this->assertEquals(0, $result['total_results']);
     }
 
-    /** @test */
     public function test_handles_non_numeric_level()
     {
         $content = [
@@ -130,7 +123,6 @@ class ParserSafetyTest extends TestCase
         $this->assertEquals(0, $result['total_results']);
     }
 
-    /** @test */
     public function test_handles_content_first_element_missing_text_key()
     {
         $content = [
@@ -147,7 +139,6 @@ class ParserSafetyTest extends TestCase
         $this->assertEquals(0, $result['total_results']);
     }
 
-    /** @test */
     public function test_from_preserves_depth_when_minlevel_changes()
     {
         // depth(2) from h2 should only include h2 and h3, not h4
@@ -162,7 +153,6 @@ class ParserSafetyTest extends TestCase
         $this->assertEmpty($result[0]['children'][0]['children'] ?? []);
     }
 
-    /** @test */
     public function test_from_called_twice_does_not_expand_depth()
     {
         $html = '<h2>A</h2><h3>B</h3><h4>C</h4>';

@@ -20,7 +20,6 @@ class TagTest extends TestCase
       ->setContext([]);
   }
 
-  /** @test */
   public function test_when_false_returns_empty_array()
   {
     $this->tag->setParameters([
@@ -30,7 +29,6 @@ class TagTest extends TestCase
     $this->assertSame([], $this->tag->index());
   }
 
-  /** @test */
   public function test_when_string_false_returns_empty_array()
   {
     // Antlers dynamic binding (:when="$condition") can deliver the value as
@@ -42,7 +40,6 @@ class TagTest extends TestCase
     $this->assertSame([], $this->tag->index());
   }
 
-  /** @test */
   public function test_when_true_outputs_items()
   {
     $this->tag->setParameters([
@@ -52,7 +49,6 @@ class TagTest extends TestCase
     $this->assertNotEmpty($this->tag->index());
   }
 
-  /** @test */
   public function test_when_string_true_outputs_items()
   {
     $this->tag->setParameters([
@@ -62,7 +58,6 @@ class TagTest extends TestCase
     $this->assertNotEmpty($this->tag->index());
   }
 
-  /** @test */
   public function test_when_omitted_outputs_items()
   {
     $this->tag->setParameters([
@@ -71,7 +66,6 @@ class TagTest extends TestCase
     $this->assertNotEmpty($this->tag->index());
   }
 
-  /** @test */
   public function test_tag_outputs_array()
   {
     $this->tag->setParameters([
@@ -82,7 +76,6 @@ class TagTest extends TestCase
     $this->assertIsArray($output);
   }
 
-  /** @test */
   public function test_tag_outputs_correct_number_of_items()
   {
     $this->tag->setParameters([
@@ -93,7 +86,6 @@ class TagTest extends TestCase
     $this->assertEquals($this->countChildren($output), 3);
   }
 
-  /** @test */
   public function test_tag_outputs_array_with_correct_number_of_items_when_flat()
   {
     $this->tag->setParameters([
@@ -104,7 +96,6 @@ class TagTest extends TestCase
     $this->assertEquals($this->countChildren($output), 3);
   }
 
-  /** @test */
   public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat()
   {
     $this->tag->setParameters([
@@ -114,7 +105,6 @@ class TagTest extends TestCase
     $this->assertEquals($this->countChildren($output), 3);
   }
 
-  /** @test */
   public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set()
   {
     $this->tag->setParameters([
@@ -125,7 +115,6 @@ class TagTest extends TestCase
     $this->assertEquals($this->countChildren($output), 2);
   }
 
-  /** @test */
   public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set()
   {
     $this->tag->setParameters([
@@ -137,7 +126,6 @@ class TagTest extends TestCase
     $this->assertEquals($this->countChildren($output), 2);
   }
 
-  /** @test */
   public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set_and_field_is_set()
   {
     $this->tag->setParameters([
@@ -155,7 +143,6 @@ class TagTest extends TestCase
     $this->assertEquals($this->countChildren($output), 2);
   }
 
-  /** @test */
   public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set_and_field_is_set_and_content_is_set()
   {
     $this->tag->setParameters([
@@ -174,7 +161,6 @@ class TagTest extends TestCase
     $this->assertEquals($this->countChildren($output), 2);
   }
 
-  /** @test */
   public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set_and_field_is_set_and_content_is_set_and_is_flat_is_set()
   {
     $this->tag->setParameters([
@@ -194,7 +180,6 @@ class TagTest extends TestCase
     $this->assertEquals($this->countChildren($output), 2);
   }
 
-  /** @test */
   public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set_and_field_is_set_and_content_is_set_and_is_flat_is_set_and_from_is_set()
   {
     $this->tag->setParameters([

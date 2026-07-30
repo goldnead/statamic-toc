@@ -16,14 +16,12 @@ class ModifierTest extends TestCase
     $this->modifier = resolve(Toc::class);
   }
 
-  /** @test */
   public function test_modifier_outputs_string()
   {
     $output = $this->modifier->index(new Value($this->fakeHTMLContent(2, 3)));
     $this->assertIsString($output);
   }
 
-  /** @test */
   public function test_modifier_adds_slugified_id_to_heading()
   {
     $output = $this->modifier->index(new Value($this->fakeHTMLContent(2, 3)));
