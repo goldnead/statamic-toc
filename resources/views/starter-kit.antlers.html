@@ -1,0 +1,89 @@
+{{#
+    Statamic ToC — Starter Kit
+    ==========================
+    A Tailwind-styled table of contents, meant to be copied and changed.
+
+    Publish it into your own project with:
+
+        php artisan vendor:publish --tag=statamic-toc-views
+
+    That copies this file to resources/views/vendor/statamic-toc/starter-kit.antlers.html.
+
+    USAGE
+    -----
+    Reads the "article" field from the current context:
+
+        {{ partial:statamic-toc::starter-kit }}
+
+    With options:
+
+        {{ partial:statamic-toc::starter-kit
+            field="content"
+            depth="3"
+            from="h2"
+            title="On this page"
+            exclude="Introduction, Footnotes"
+        }}
+
+    PARAMETERS
+    ----------
+    field    Name of the field to parse. Default: "article"
+    depth    How many heading levels to show. Default: 3
+    from     Heading level to start from, h1 to h6. Default: "h1"
+    title    Label above the list. Default: "Table of Contents"
+    exclude  Comma-separated headings or a regex to skip. Default: none
+
+    The anchors here come from the same slugs the `toc` modifier injects, so
+    apply `{{ your_field | toc }}` to the content itself or the links go nowhere.
+
+    Tailwind only sees classes in the files it scans. If you use this partial
+    straight from the addon instead of publishing it, add the addon path to the
+    content sources in your Tailwind config:
+
+        './vendor/goldnead/statamic-toc/resources/views/**/*.html'
+#}}
+
+{{ toc_field = field ?? 'article' }}
+{{ toc_depth = depth ?? 3 }}
+{{ toc_from = from ?? 'h1' }}
+{{ toc_label = title ?? 'Table of Contents' }}
+{{ toc_exclude = exclude ?? '' }}
+
+{{ toc_total = {toc:count :field="toc_field" :depth="toc_depth" :from="toc_from" :exclude="toc_exclude"} }}
+
+{{ if toc_total > 0 }}
+<nav id="statamic-toc" aria-label="{{ toc_label }}">
+
+    {{# Header: label on the left, number of entries on the right. #}}
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10m-10 6h7" />
+            </svg>
+            <span class="text-base font-semibold text-slate-800">{{ toc_label }}</span>
+        </div>
+        <span class="text-xs font-medium text-slate-400 tabular-nums">{{ toc_total }} sections</span>
+    </div>
+
+    {{#
+        The list. Every item exposes toc_title, toc_id, level, has_children,
+        children, is_root and parent. The recursive block re-runs this same
+        markup for nested headings, so the styling applies at every level.
+    #}}
+    <ol role="list" class="space-y-0.5 text-sm">
+        {{ toc :field="toc_field" :depth="toc_depth" :from="toc_from" :exclude="toc_exclude" }}
+            <li>
+                <a href="#{{ toc_id }}"
+                   class="block py-1.5 px-2 rounded-md text-slate-600 no-underline transition-colors hover:text-slate-900 hover:bg-slate-50 {{ if is_root }}font-medium{{ else }}font-normal{{ /if }}">{{ toc_title }}</a>
+
+                {{ if has_children }}
+                    <ol role="list" class="ml-4 space-y-0.5">
+                        {{ *recursive children* }}
+                    </ol>
+                {{ /if }}
+            </li>
+        {{ /toc }}
+    </ol>
+
+</nav>
+{{ /if }}

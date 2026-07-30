@@ -171,6 +171,48 @@ If you don't want to display your ToC as a nested list you can pass the paramete
 </ol>
 ```
 
+### Starter Kit
+
+A Tailwind-styled partial ships with the addon as a starting point. It reads the `article` field
+from the current context:
+
+```
+{{ partial:statamic-toc::starter-kit }}
+```
+
+It takes the same parameters as the tag, plus a `title` for the label above the list:
+
+```
+{{ partial:statamic-toc::starter-kit
+    field="content"
+    depth="3"
+    from="h2"
+    title="On this page"
+    exclude="Introduction, Footnotes"
+}}
+```
+
+When the field holds no headings, the partial renders nothing at all, so you can drop it into a
+template without wrapping it in a condition.
+
+To change the markup, publish it into your project:
+
+```bash
+php artisan vendor:publish --tag=statamic-toc-views
+```
+
+That copies the file to `resources/views/vendor/statamic-toc/starter-kit.antlers.html`.
+
+Tailwind only sees classes in the files it scans. If you use the partial straight from the addon
+instead of publishing it, add the addon path to the content sources in your Tailwind config:
+
+```js
+'./vendor/goldnead/statamic-toc/resources/views/**/*.html'
+```
+
+The partial only renders the list. The anchors point at the IDs the modifier injects, so the content
+field itself still needs `{{ your_field | toc }}`.
+
 ### Excluding headings
 
 Pass `exclude` to leave individual headings out of the list. A comma-separated string matches
