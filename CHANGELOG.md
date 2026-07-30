@@ -2,6 +2,12 @@
 
 All notable changes to `statamic-toc` will be documented in this file.
 
+## Unreleased
+
+- New: a Tailwind-styled starter-kit partial, `{{ partial:statamic-toc::starter-kit }}`. Publish it
+  with `php artisan vendor:publish --tag=statamic-toc-views` to change the markup.
+- The addon registers its view namespace explicitly, so partials resolve in package test suites too.
+
 ## 2026-07-30 v1.9
 
 - Headings inside nested Bard sets (columns, grids, replicators) are now found. Previously only

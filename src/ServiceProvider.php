@@ -15,4 +15,20 @@ class ServiceProvider extends AddonServiceProvider
     protected $modifiers = [
         TocModifier::class,
     ];
+
+    protected $viewNamespace = 'statamic-toc';
+
+    public function bootAddon()
+    {
+        // Registered explicitly instead of relying on the automatic boot, which
+        // resolves the addon directory through the manifest and comes up empty
+        // in package test suites.
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'statamic-toc');
+
+        // The parent's $publishables maps into public_path(), which is meant for
+        // assets. Views belong in the project's view folder.
+        $this->publishes([
+            __DIR__.'/../resources/views' => resource_path('views/vendor/statamic-toc'),
+        ], 'statamic-toc-views');
+    }
 }
