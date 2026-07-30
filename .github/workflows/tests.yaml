@@ -20,7 +20,22 @@ jobs:
             laravel: "12.*"
             testbench: "10.*"
             os: ubuntu-latest
+          - php: "8.3"
+            statamic: "5.*"
+            laravel: "12.*"
+            testbench: "10.*"
+            os: ubuntu-latest
           - php: "8.2"
+            statamic: "6.*"
+            laravel: "12.*"
+            testbench: "10.*"
+            os: ubuntu-latest
+          - php: "8.3"
+            statamic: "6.*"
+            laravel: "12.*"
+            testbench: "10.*"
+            os: ubuntu-latest
+          - php: "8.4"
             statamic: "6.*"
             laravel: "12.*"
             testbench: "10.*"

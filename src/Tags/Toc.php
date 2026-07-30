@@ -64,15 +64,20 @@ class Toc extends Tags
     private function options(): Options
     {
         $options = Options::default()
-            ->withDepth($this->params->int('depth', 3))
-            ->withFrom($this->param('from') ?? 'h1')
-            ->withFlat($this->params->bool('is_flat'))
+            ->withDepth($this->params->int('depth', (int) $this->config('depth', 3)))
+            ->withFrom($this->param('from') ?? $this->config('from', 'h1'))
+            ->withFlat($this->params->bool('is_flat', (bool) $this->config('flat', false)))
             ->withExclude($this->stringParam('exclude'));
 
         // `to` is absolute and wins over the relative depth when both are given.
-        return $this->params->has('to')
-            ? $options->withTo($this->param('to'))
-            : $options;
+        $to = $this->params->has('to') ? $this->param('to') : $this->config('to');
+
+        return $to ? $options->withTo($to) : $options;
+    }
+
+    private function config(string $key, mixed $fallback = null): mixed
+    {
+        return config('statamic-toc.'.$key, $fallback);
     }
 
     /**
@@ -85,7 +90,9 @@ class Toc extends Tags
             return $content;
         }
 
-        $field = $this->context->get($this->params->get('field', 'article'));
+        $field = $this->context->get(
+            $this->params->get('field', $this->config('field', 'article'))
+        );
 
         if (! $field) {
             return null;

@@ -44,6 +44,14 @@ All notable changes to `statamic-toc` will be documented in this file.
 - Options live in one immutable `Options` object instead of two mutable level
   fields recomputed from each other. `Parser::flattenFrom()`, an empty stub
   marked TODO since 2021, is gone.
+- An optional config file for the defaults, `field`, `from`, `depth`, `to` and
+  `flat`. Publish it with `--tag=statamic-toc-config`. Without it the same
+  defaults apply as before. Closes the oldest open issue, #6 from 2021.
+- Removed `package.json`. The addon has no JavaScript and no build step; the
+  file declared an index.js that does not exist, stub scripts that exit with an
+  error, and MIT, which contradicted the actual licence.
+- `UPGRADE.md` documents every behaviour change from v1.
+- CI runs PHP 8.2, 8.3 and 8.4 across Statamic 5 and 6.
 
 ## 2026-07-30 v1.9
 
