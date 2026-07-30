@@ -107,6 +107,29 @@ class ParserSafetyTest extends TestCase
         $this->assertEquals(0, $result['total_results']);
     }
 
+    public function test_handles_object_attrs()
+    {
+        // A malformed Bard node whose 'attrs' is an object (stdClass) instead
+        // of an array must not crash on the level access with "Cannot use
+        // object of type stdClass as array". The null-coalesce on
+        // $items['attrs']['level'] does not protect against this.
+        $attrs = new \stdClass;
+        $attrs->level = 2;
+
+        $content = [
+            [
+                'type' => 'heading',
+                'attrs' => $attrs,
+                'content' => [['type' => 'text', 'text' => 'Test']],
+            ],
+        ];
+
+        $result = (new Parser($content))->build();
+
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['total_results']);
+    }
+
     public function test_handles_non_numeric_level()
     {
         $content = [

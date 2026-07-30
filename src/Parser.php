@@ -424,7 +424,9 @@ class Parser
 
         // Processing a single node or set (keyed array)
         if (isset($items['type']) && $items['type'] === 'heading') {
-            $level = $items['attrs']['level'] ?? 0;
+            // 'attrs' can be an object (stdClass) on malformed Bard nodes; the
+            // null-coalesce does not protect against array access on an object.
+            $level = is_array($items['attrs'] ?? null) ? ($items['attrs']['level'] ?? 0) : 0;
             if (is_numeric($level) && $level >= $this->minLevel && $level <= $this->maxLevel) {
                 // 'content' can be missing or a scalar on malformed Bard nodes.
                 $content = $items['content'] ?? [];
