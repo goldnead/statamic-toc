@@ -301,7 +301,8 @@ class Parser
             $headings->each(function ($heading, $key) use (&$tocArray) {
                 // Check, if the heading isn't empty or if the content type is really text
                 if (! isset($heading['content'])
-                    || empty($heading['content'])
+                    || ! is_array($heading['content'])
+                    || ! isset($heading['content'][0])
                     || ! is_array($heading['content'][0])
                     || ($heading['content'][0]['type'] ?? null) !== 'text'
                     || ! isset($heading['content'][0]['text'])) {

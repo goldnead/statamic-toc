@@ -95,6 +95,25 @@ class ParserSafetyTest extends TestCase
     }
 
     /** @test */
+    public function test_handles_scalar_content()
+    {
+        // A malformed Bard node whose 'content' is a scalar (e.g. an int)
+        // instead of an array must not crash on the content[0] dereference.
+        $content = [
+            [
+                'type' => 'heading',
+                'attrs' => ['level' => 2],
+                'content' => 123,
+            ],
+        ];
+
+        $result = (new Parser($content))->build();
+
+        $this->assertIsArray($result);
+        $this->assertEquals(0, $result['total_results']);
+    }
+
+    /** @test */
     public function test_handles_content_first_element_missing_text_key()
     {
         $content = [
