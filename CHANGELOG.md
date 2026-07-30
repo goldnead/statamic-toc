@@ -8,6 +8,22 @@ All notable changes to `statamic-toc` will be documented in this file.
   with `php artisan vendor:publish --tag=statamic-toc-views` to change the markup.
 - The addon registers its view namespace explicitly, so partials resolve in package test suites too.
 
+## Unreleased (v2)
+
+- Requires PHP 8.2 and Statamic 5 or 6. Statamic 3 and 4 stay on the v1 line.
+- `league/commonmark` is a declared dependency instead of something the addon
+  hoped Statamic would bring along.
+- Heading extraction moved out of `Parser` into `Extractors/{Bard,Html,Markdown}`
+  behind one interface, chosen by an explicit `Detector`. Content is no longer
+  taken for markdown because it contains a `#`, and HTML without headings no
+  longer falls through the markdown branch.
+- Extractors report every heading at every level plus any id already on it.
+  Filtering by level moved to the caller, which is what lets the tag and the
+  modifier eventually share one set of headings.
+- Dropped `mb_convert_encoding(..., 'HTML-ENTITIES', ...)`, deprecated since
+  PHP 8.2, and `CommonMarkConverter::convertToHtml()`, deprecated in
+  league/commonmark 2.
+
 ## 2026-07-30 v1.9
 
 - Headings inside nested Bard sets (columns, grids, replicators) are now found. Previously only
