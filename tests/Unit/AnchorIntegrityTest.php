@@ -127,6 +127,20 @@ class AnchorIntegrityTest extends TestCase
         $this->assertStringContainsString('id="mine"', $output);
     }
 
+
+    public function test_a_heading_whose_attrs_are_an_object_does_not_crash_the_id_lookup()
+    {
+        // The same malformed-Bard shape ParserSafetyTest guards `level` against.
+        // Reading a hand-written id has to survive it too.
+        $node = [
+            'type' => 'heading',
+            'attrs' => (object) ['level' => 2, 'id' => 'mine'],
+            'content' => [['type' => 'text', 'text' => 'Kept']],
+        ];
+
+        $this->assertIsArray((new Parser())->make([$node])->build());
+    }
+
     // ------------------------------------------------------------ helpers
 
     private function walk(array $headings, callable $fn): void

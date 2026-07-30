@@ -433,7 +433,11 @@ class Parser
                 $title = is_array($content) ? $this->normalizeHeadingText($content) : '';
 
                 if ($title !== '' && $this->shouldIncludeHeading($title)) {
-                    $existingId = $items['attrs']['id'] ?? null;
+                    // Same guard as `level` above: 'attrs' can be a stdClass on
+                    // a malformed node, and array access on an object fatals.
+                    $existingId = is_array($items['attrs'] ?? null)
+                        ? ($items['attrs']['id'] ?? null)
+                        : null;
 
                     $this->headings[] = [
                         'toc_title' => $title,

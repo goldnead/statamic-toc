@@ -36,6 +36,13 @@ linked to the second. The pattern no longer requires the trailing character, and
 `data-id` and `aria-id` through a lookbehind rather than by accident. The list now also links to
 a hand-written id instead of slugging past it, so both halves name the same anchor.
 
+### Fixed — a malformed Bard node could fatal instead of being skipped
+
+`collectHeadingsRecursively()` read `$items['attrs']['level']`, which throws
+`Cannot use object of type stdClass as array` when a node's `attrs` arrives as an object rather
+than an array. The null-coalesce does not protect against array access on an object. Both reads
+of `attrs` are guarded now (#39).
+
 ### Added
 
 - A Tailwind-styled starter-kit partial, `{{ partial:statamic-toc::starter-kit }}`. Publish it
