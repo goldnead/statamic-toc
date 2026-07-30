@@ -2,7 +2,7 @@
 
 All notable changes to `statamic-toc` will be documented in this file.
 
-## 2026-07-30 v1.8
+## 2026-07-30 v1.9
 
 - Headings inside nested Bard sets (columns, grids, replicators) are now found. Previously only
   top-level nodes were scanned.
@@ -17,7 +17,7 @@ All notable changes to `statamic-toc` will be documented in this file.
   annotations are no longer read. Method names now carry the `test_` prefix, which works on
   every supported PHPUnit version.
 
-## ???-??-?? v1.05
+## 2026-04-08 v1.8
 
 - Support for Statamic v6
 
