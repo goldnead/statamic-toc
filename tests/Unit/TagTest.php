@@ -21,7 +21,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function when_false_returns_empty_array()
+  public function test_when_false_returns_empty_array()
   {
     $this->tag->setParameters([
       'content' => $this->fakeHTMLContent(2, 3),
@@ -31,7 +31,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function when_string_false_returns_empty_array()
+  public function test_when_string_false_returns_empty_array()
   {
     // Antlers dynamic binding (:when="$condition") can deliver the value as
     // the string "false" rather than a boolean — this was the bug in issue #28.
@@ -43,7 +43,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function when_true_outputs_items()
+  public function test_when_true_outputs_items()
   {
     $this->tag->setParameters([
       'content' => $this->fakeHTMLContent(2, 3),
@@ -53,7 +53,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function when_string_true_outputs_items()
+  public function test_when_string_true_outputs_items()
   {
     $this->tag->setParameters([
       'content' => $this->fakeHTMLContent(2, 3),
@@ -63,7 +63,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function when_omitted_outputs_items()
+  public function test_when_omitted_outputs_items()
   {
     $this->tag->setParameters([
       'content' => $this->fakeHTMLContent(2, 3),
@@ -72,7 +72,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function tag_outputs_array()
+  public function test_tag_outputs_array()
   {
     $this->tag->setParameters([
       'content' => $this->fakeHTMLContent(2, 3),
@@ -83,7 +83,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function tag_outputs_correct_number_of_items()
+  public function test_tag_outputs_correct_number_of_items()
   {
     $this->tag->setParameters([
       'content' => $this->fakeBardArray(2, 3),
@@ -94,7 +94,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function tag_outputs_array_with_correct_number_of_items_when_flat()
+  public function test_tag_outputs_array_with_correct_number_of_items_when_flat()
   {
     $this->tag->setParameters([
       'content' => $this->fakeHTMLContent(2, 3),
@@ -105,7 +105,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function tag_outputs_array_with_correct_number_of_items_when_not_flat()
+  public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat()
   {
     $this->tag->setParameters([
       'content' => $this->fakeHTMLContent(2, 3),
@@ -115,7 +115,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set()
+  public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set()
   {
     $this->tag->setParameters([
       'content' => $this->fakeBardArray(3, 6, false),
@@ -126,7 +126,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set()
+  public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set()
   {
     $this->tag->setParameters([
       'content' => $this->fakeHTMLContent(3, 6, false),
@@ -138,7 +138,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set_and_field_is_set()
+  public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set_and_field_is_set()
   {
     $this->tag->setParameters([
       "depth" => 2,
@@ -156,7 +156,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set_and_field_is_set_and_content_is_set()
+  public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set_and_field_is_set_and_content_is_set()
   {
     $this->tag->setParameters([
       "depth" => 2,
@@ -175,7 +175,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set_and_field_is_set_and_content_is_set_and_is_flat_is_set()
+  public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set_and_field_is_set_and_content_is_set_and_is_flat_is_set()
   {
     $this->tag->setParameters([
       "depth" => 2,
@@ -195,7 +195,7 @@ class TagTest extends TestCase
   }
 
   /** @test */
-  public function tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set_and_field_is_set_and_content_is_set_and_is_flat_is_set_and_from_is_set()
+  public function test_tag_outputs_array_with_correct_number_of_items_when_not_flat_and_depth_is_set_and_from_is_set_and_field_is_set_and_content_is_set_and_is_flat_is_set_and_from_is_set()
   {
     $this->tag->setParameters([
       "depth" => 2,

@@ -19,7 +19,7 @@ class RecursionTest extends TestCase
     }
 
     /** @test */
-    public function when_true_renders_toc()
+    public function test_when_true_renders_toc()
     {
         $this->tag->setParameters([
             'content' => '<h1>Heading 1</h1><h2>Heading 2</h2>',
@@ -32,7 +32,7 @@ class RecursionTest extends TestCase
     }
 
     /** @test */
-    public function when_false_suppresses_toc()
+    public function test_when_false_suppresses_toc()
     {
         $this->tag->setParameters([
             'content' => '<h1>Heading 1</h1><h2>Heading 2</h2>',
@@ -43,7 +43,7 @@ class RecursionTest extends TestCase
     }
 
     /** @test */
-    public function when_string_false_suppresses_toc()
+    public function test_when_string_false_suppresses_toc()
     {
         $this->tag->setParameters([
             'content' => '<h1>Heading 1</h1><h2>Heading 2</h2>',
@@ -54,7 +54,7 @@ class RecursionTest extends TestCase
     }
 
     /** @test */
-    public function when_string_true_renders_toc()
+    public function test_when_string_true_renders_toc()
     {
         $this->tag->setParameters([
             'content' => '<h1>Heading 1</h1><h2>Heading 2</h2>',
