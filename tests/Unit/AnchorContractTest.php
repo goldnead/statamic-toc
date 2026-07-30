@@ -203,4 +203,35 @@ class AnchorContractTest extends AddonTestCase
 
         $this->assertAnchorsResolve($html, 'Inline markup must not change the slug on one side only.');
     }
+
+    public function test_excluding_a_heading_does_not_shift_the_anchors_of_the_others()
+    {
+        $html = '<h2>Intro</h2><h2>Skip me</h2><h2>Intro</h2>';
+
+        $withEverything = $this->listFor($html);
+        $withExclusion = $this->listFor($html, fn ($p) => $p->exclude('Skip me'));
+
+        // A heading the list does not show still exists in the document, so it
+        // still owns its slug. Excluding it must not renumber the duplicate
+        // below it, or the anchors move for a parameter about visibility.
+        $this->assertSame('intro', $withEverything[0]['toc_id']);
+        $this->assertSame('intro-2', $withEverything[2]['toc_id']);
+
+        $this->assertSame('intro', $withExclusion[0]['toc_id']);
+        $this->assertSame('intro-2', $withExclusion[1]['toc_id']);
+    }
+
+    private function listFor(string $html, ?callable $configure = null): array
+    {
+        $parser = (new \Goldnead\StatamicToc\Parser)->make($html)->depth(6)->flatten();
+
+        if ($configure) {
+            $configure($parser);
+        }
+
+        return array_values(array_filter(
+            $parser->build(),
+            fn ($row) => is_array($row) && isset($row['toc_id']),
+        ));
+    }
 }

@@ -2,7 +2,12 @@
 
 All notable changes to `statamic-toc` will be documented in this file.
 
-## Unreleased (v2)
+## 2026-07-30 v2.0.0
+
+A rewrite of the internals behind an unchanged template API. Every tag parameter and every
+template variable from v1 still works and the output has the same shape; `UPGRADE.md` lists
+every behaviour that differs, and `{{ toc:count }}` is the one likely to need an edit.
+
 
 - Requires PHP 8.2 and Statamic 5 or 6. Statamic 3 and 4 stay on the v1 line.
 - `league/commonmark` is a declared dependency instead of something the addon
@@ -46,6 +51,9 @@ All notable changes to `statamic-toc` will be documented in this file.
   error, and MIT, which contradicted the actual licence.
 - `UPGRADE.md` documents every behaviour change from v1.
 - CI runs PHP 8.2, 8.3 and 8.4 across Statamic 5 and 6.
+- Carries everything from v1.10, including the three anchor fixes and the guard against a
+  malformed Bard node whose `attrs` arrive as an object. The v1.10 regression tests run
+  unchanged against the rewrite, which is what says the two lines agree.
 
 ## 2026-07-30 v1.10
 

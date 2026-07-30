@@ -59,14 +59,19 @@ class BardExtractor implements Extractor
 
     private function collect(array $node): void
     {
-        $level = $node['attrs']['level'] ?? null;
+        // 'attrs' can arrive as a stdClass on a malformed node, and array
+        // access on an object fatals — the null-coalesce does not stop it.
+        // Read it once, guarded, rather than twice unguarded.
+        $attrs = is_array($node['attrs'] ?? null) ? $node['attrs'] : [];
+
+        $level = $attrs['level'] ?? null;
 
         if (! is_numeric($level)) {
             return;
         }
 
         $content = $node['content'] ?? [];
-        $id = $node['attrs']['id'] ?? null;
+        $id = $attrs['id'] ?? null;
 
         $this->headings[] = new Heading(
             title: is_array($content) ? $this->text($content) : '',
