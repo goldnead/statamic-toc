@@ -7,6 +7,7 @@
 
 namespace Goldnead\StatamicToc;
 
+use Goldnead\StatamicToc\Extractors\Detector;
 use Illuminate\Support\Str;
 
 class Parser
@@ -72,11 +73,7 @@ class Parser
      */
     public function isHTML(): bool
     {
-        if (! is_string($this->content)) {
-            return false;
-        }
-
-        return Str::contains($this->content, '<h');
+        return (new Detector)->isHtml($this->content);
     }
 
     /**
@@ -84,7 +81,7 @@ class Parser
      */
     public function isBard(): bool
     {
-        return is_array($this->content);
+        return (new Detector)->isBard($this->content);
     }
 
     /**
@@ -92,11 +89,7 @@ class Parser
      */
     public function isMarkdown(): bool
     {
-        if (! is_string($this->content)) {
-            return false;
-        }
-
-        return Str::contains($this->content, '#') && ! $this->isHTML();
+        return (new Detector)->isMarkdown($this->content);
     }
 
     /**
@@ -197,13 +190,9 @@ class Parser
 
     private function generate(): array
     {
-        if ($this->isHTML()) {
-            return $this->generateFromHtml();
-        } elseif ($this->isMarkdown()) {
-            return $this->generateFromMarkdown();
-        } else {
-            return $this->generateFromStructure();
-        }
+        return $this->assemble(
+            (new Detector)->for($this->content)->extract($this->content)
+        );
     }
 
     public function supplementExtraOutput(array $toc): array
@@ -228,83 +217,27 @@ class Parser
     }
 
     /**
-     * Parses a HTML-input and returns a fake bard-structure to be processed
-     * by $this->generateFromStructure().
+     * Turns the extracted headings into the array the tag renders: filtered to
+     * the requested level range, slugged, then linked up into a tree.
      */
-    private function generateFromHtml($content = null): array
+    private function assemble(array $extracted): array
     {
-        if (! $content) {
-            $content = $this->content;
+        foreach ($extracted as $heading) {
+            if ($heading->level < $this->minLevel || $heading->level > $this->maxLevel) {
+                continue;
+            }
+
+            if ($heading->isEmpty() || ! $this->shouldIncludeHeading($heading->title)) {
+                continue;
+            }
+
+            $this->headings[] = [
+                'toc_title' => $heading->title,
+                'level' => $heading->level,
+                'toc_id' => $this->generateId($heading->title, true),
+                'id' => count($this->headings) + 1,
+            ];
         }
-
-        // Erstellen Sie eine neue Instanz von DOMDocument
-        $doc = new \DOMDocument;
-
-        // Vermeiden von Warnungen bei fehlerhaftem HTML
-        libxml_use_internal_errors(true);
-
-        // Stellen Sie sicher, dass der Inhalt in UTF-8 kodiert ist
-        $content = mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8');
-
-        // Laden Sie das HTML in das DOMDocument
-        $doc->loadHTML('<!DOCTYPE html><html><body>'.$content.'</body></html>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-
-        // Bereinigen Sie die Fehler
-        libxml_clear_errors();
-
-        // Erstellen Sie eine XPath-Abfrage, um alle Überschriften in der richtigen Reihenfolge zu erhalten
-        $xpath = new \DOMXpath($doc);
-        $htags = $xpath->query('//h1 | //h2 | //h3 | //h4 | //h5 | //h6');
-
-        // Leere Sammlung für unsere Überschriften
-        $headings = collect([]);
-
-        // Iterieren Sie über jedes Tag und erstellen Sie ein Objekt ähnlich dem, das von Bard verwendet wird
-        foreach ($htags as $tag) {
-            $headings->push([
-                'type' => 'heading',
-                'attrs' => [
-                    'level' => (int) ltrim($tag->nodeName, 'h'),
-                ],
-                'content' => [
-                    [
-                        'type' => 'text',
-                        // Stellen Sie sicher, dass der Text in UTF-8 ist
-                        'text' => $tag->nodeValue,
-                    ],
-                ],
-            ]);
-        }
-
-        return $this->generateFromStructure($headings->toArray());
-    }
-
-    /**
-     * Parses a markdown-input and converts it to HTML to be processed
-     * by $this->generateFromHtml().
-     */
-    private function generateFromMarkdown(): array
-    {
-        $converter = new \League\CommonMark\CommonMarkConverter;
-        $html = $converter->convertToHtml($this->content);
-
-        return $this->generateFromHtml($html);
-    }
-
-    /**
-     * Generates an array of elements necessairy for the TOC-Tag to
-     * function.
-     */
-    private function generateFromStructure($structure = null): array
-    {
-        // create a collection with the content array
-        $raw = ! $structure ? $this->content : $structure;
-
-        if (! is_array($raw)) {
-            return [];
-        }
-
-        $this->collectHeadingsRecursively($raw);
 
         if (empty($this->headings)) {
             return [];
@@ -363,78 +296,6 @@ class Parser
 
         // return flat array if flag is true, nest it if not
         return $this->isFlat ? $this->headings : $this->nestHeadings();
-    }
-
-    /**
-     * Recursive function to collect headings from a Bard/Structure array.
-     */
-    private function collectHeadingsRecursively($items)
-    {
-        if (! is_array($items)) {
-            return;
-        }
-
-        // If it's a sequential array (a list of nodes or sets)
-        if (isset($items[0])) {
-            foreach ($items as $item) {
-                $this->collectHeadingsRecursively($item);
-            }
-
-            return;
-        }
-
-        // Processing a single node or set (keyed array)
-        if (isset($items['type']) && $items['type'] === 'heading') {
-            $level = $items['attrs']['level'] ?? 0;
-            if (is_numeric($level) && $level >= $this->minLevel && $level <= $this->maxLevel) {
-                // 'content' can be missing or a scalar on malformed Bard nodes.
-                $content = $items['content'] ?? [];
-                $title = is_array($content) ? $this->normalizeHeadingText($content) : '';
-
-                if ($title !== '' && $this->shouldIncludeHeading($title)) {
-                    $this->headings[] = [
-                        'toc_title' => $title,
-                        'level' => (int) $level,
-                        'toc_id' => $this->generateId($title, true),
-                        'id' => count($this->headings) + 1,
-                    ];
-                }
-            }
-        }
-
-        // Recurse into all properties that are arrays (except 'attrs' unless it's a set)
-        foreach ($items as $key => $value) {
-            if (! is_array($value)) {
-                continue;
-            }
-
-            if ($key === 'attrs' && isset($items['type']) && $items['type'] !== 'set') {
-                continue;
-            }
-
-            $this->collectHeadingsRecursively($value);
-        }
-    }
-
-    /**
-     * Normalizes heading text by concatenating all text segments.
-     */
-    private function normalizeHeadingText(array $content): string
-    {
-        $text = '';
-        foreach ($content as $node) {
-            if (! is_array($node)) {
-                continue;
-            }
-
-            if (isset($node['text']) && is_scalar($node['text'])) {
-                $text .= $node['text'];
-            } elseif (isset($node['content']) && is_array($node['content'])) {
-                $text .= $this->normalizeHeadingText($node['content']);
-            }
-        }
-
-        return trim($text);
     }
 
     /**
