@@ -10,8 +10,9 @@ What follows is the complete list of things that behave differently.
 - PHP 8.2 or newer
 - Statamic 5 or 6
 
-Statamic 3 and 4 stay on the v1 line. If you are on either, keep `goldnead/statamic-toc:^1.10`,
-which carries the anchor fixes described below.
+**Statamic 3 and 4 are no longer supported.** The v1 line ends at `v1.10` and receives no
+further fixes. That tag stays installable, so a `composer.json` already pinned to it keeps
+resolving, but the upgrade path from Statamic 3 or 4 is Statamic itself.
 
 ## Anchors are decided in one place now
 

@@ -10,6 +10,8 @@ every behaviour that differs, and `{{ toc:count }}` is the one likely to need an
 
 
 - Requires PHP 8.2 and Statamic 5 or 6. Statamic 3 and 4 stay on the v1 line.
+  *(Corrected 2026-07-31: that line is not maintained further. It ends at `v1.10`,
+  which stays installable and receives no more fixes.)*
 - `league/commonmark` is a declared dependency instead of something the addon
   hoped Statamic would bring along.
 - Heading extraction moved out of `Parser` into `Extractors/{Bard,Html,Markdown}`

@@ -43,7 +43,8 @@ composer require goldnead/statamic-toc
 
 No further Vendor-Publishing or config files are needed.
 
-Requires PHP 8.2 and Statamic 5 or 6. For Statamic 3 or 4, stay on `^1.9`.
+Requires PHP 8.2 and Statamic 5 or 6. Statamic 3 and 4 are no longer supported: the v1 line
+ends at `v1.10`, which stays installable but receives no further fixes.
 Upgrading from v1? See [UPGRADE.md](UPGRADE.md).
 
 ## Usage
