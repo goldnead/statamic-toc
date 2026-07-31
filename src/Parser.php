@@ -7,24 +7,16 @@
 
 namespace Goldnead\StatamicToc;
 
+use Goldnead\StatamicToc\Anchors\IdInjector;
 use Goldnead\StatamicToc\Extractors\Detector;
-use Illuminate\Support\Str;
 
 class Parser
 {
     private $content;
 
-    private $slugs = [];
-
-    private $maxLevel = 3;
-
-    private $minLevel = 1;
-
     private $headings = [];
-    
-    private $exclude;
 
-    private $isFlat = false;
+    private Options $options;
 
     /**
      * Constructor.
@@ -33,11 +25,22 @@ class Parser
      */
     public function __construct($content = null)
     {
-        $this->slugs = collect($this->slugs);
+        $this->options = Options::default();
 
         if ($content) {
             $this->setContent($content);
         }
+
+        return $this;
+    }
+
+    /**
+     * Replaces the whole option set at once. The fluent setters below stay for
+     * anyone driving the parser directly.
+     */
+    public function options(Options $options): self
+    {
+        $this->options = $options;
 
         return $this;
     }
@@ -61,7 +64,6 @@ class Parser
      */
     public function make($content)
     {
-        $this->slugs = collect();
         $this->headings = [];
         $this->content = $content;
 
@@ -93,14 +95,28 @@ class Parser
     }
 
     /**
-     * Sets the given List-Depth
+     * How many levels the list spans, counted from the starting level.
      *
      * @param  int  $depth
      * @return $this
      */
     public function depth($depth)
     {
-        $this->maxLevel = $depth + $this->minLevel - 1;
+        $this->options = $this->options->withDepth((int) $depth);
+
+        return $this;
+    }
+
+    /**
+     * The deepest level the list shows, as an absolute level. Says the same
+     * thing as depth() without the arithmetic.
+     *
+     * @param  string|int  $level
+     * @return $this
+     */
+    public function to($level)
+    {
+        $this->options = $this->options->withTo($level);
 
         return $this;
     }
@@ -113,22 +129,7 @@ class Parser
      */
     public function from($start)
     {
-        // parse string if it has the syntax "h(int)" (eg. h2)
-        if (is_string($start)) {
-            $start = intval(ltrim($start, 'h'));
-        }
-        // reset starting value if it is below or above the supported ones
-        if ($start < 1) {
-            $start = 1;
-        } elseif ($start > 6) {
-            $start = 6;
-        }
-
-        $currentDepth = $this->maxLevel - $this->minLevel + 1;
-        $this->minLevel = $start;
-        // our depth is relative to the minLevel. So we need to update it if
-        // the minLevel changes
-        $this->depth($currentDepth);
+        $this->options = $this->options->withFrom($start);
 
         return $this;
     }
@@ -141,7 +142,7 @@ class Parser
      */
     public function exclude($exclude)
     {
-        $this->exclude = $exclude;
+        $this->options = $this->options->withExclude($exclude);
 
         return $this;
     }
@@ -153,19 +154,10 @@ class Parser
      */
     public function flatten()
     {
-        $this->isFlat = true;
+        $this->options = $this->options->withFlat();
 
         return $this;
     }
-
-    /**
-     * Stops the recursion at the given level.
-     * TODO/FEATURE/WHY?
-     *
-     * @param [type] $level
-     * @return void
-     */
-    public function flattenFrom($level) {}
 
     /**
      * Sets the flattening only if the given parameter is true.
@@ -190,9 +182,17 @@ class Parser
 
     private function generate(): array
     {
-        return $this->assemble(
-            (new Detector)->for($this->content)->extract($this->content)
-        );
+        $extracted = (new Detector)->for($this->content)->extract($this->content);
+
+        // Anchors are decided once per document, for every heading, and shared
+        // with the modifier. The level range only decides what the list shows,
+        // never what a heading is called.
+        return $this->assemble($extracted, $this->registry()->anchorsFor($extracted));
+    }
+
+    private function registry(): Registry
+    {
+        return app(Registry::class);
     }
 
     public function supplementExtraOutput(array $toc): array
@@ -220,10 +220,10 @@ class Parser
      * Turns the extracted headings into the array the tag renders: filtered to
      * the requested level range, slugged, then linked up into a tree.
      */
-    private function assemble(array $extracted): array
+    private function assemble(array $extracted, array $anchors): array
     {
-        foreach ($extracted as $heading) {
-            if ($heading->level < $this->minLevel || $heading->level > $this->maxLevel) {
+        foreach ($extracted as $index => $heading) {
+            if (! $this->options->covers($heading->level)) {
                 continue;
             }
 
@@ -231,10 +231,14 @@ class Parser
                 continue;
             }
 
+            if (($anchors[$index] ?? null) === null) {
+                continue;
+            }
+
             $this->headings[] = [
                 'toc_title' => $heading->title,
                 'level' => $heading->level,
-                'toc_id' => $this->generateId($heading->title, true),
+                'toc_id' => $anchors[$index],
                 'id' => count($this->headings) + 1,
             ];
         }
@@ -295,7 +299,7 @@ class Parser
         }
 
         // return flat array if flag is true, nest it if not
-        return $this->isFlat ? $this->headings : $this->nestHeadings();
+        return $this->options->flat ? $this->headings : $this->nestHeadings();
     }
 
     /**
@@ -303,22 +307,22 @@ class Parser
      */
     private function shouldIncludeHeading(string $title): bool
     {
-        if (! $this->exclude) {
+        if (! $this->options->exclude) {
             return true;
         }
 
         // Treat as regex only when it looks like a delimited pattern (e.g. /foo/i).
         // This avoids calling preg_match on plain strings, which would emit warnings.
-        if (preg_match('/^([^\w\s\\\\])[^\1]*\1[gimsuy]*$/', $this->exclude)) {
+        if (preg_match('/^([^\w\s\\\\])[^\1]*\1[gimsuy]*$/', $this->options->exclude)) {
             try {
-                return ! preg_match($this->exclude, $title);
+                return ! preg_match($this->options->exclude, $title);
             } catch (\Throwable $e) {
                 // Invalid regex — fall through to string match
             }
         }
 
         // Comma-separated string match; skip empty tokens to avoid matching everything
-        foreach (explode(',', $this->exclude) as $exc) {
+        foreach (explode(',', $this->options->exclude) as $exc) {
             $exc = trim($exc);
             if ($exc !== '' && stripos($title, $exc) !== false) {
                 return false;
@@ -355,62 +359,26 @@ class Parser
     }
 
     /**
-     * Injects header HTML-Elements with thparamseir corersponding ids.
+     * Injects the anchors into a rendered HTML string.
+     *
+     * Kept as public API for anyone calling the parser directly. It no longer
+     * computes ids of its own: it looks up the anchors this document already
+     * got, so tag and modifier can never disagree.
      */
     public function injectIds($value, $params = null): string
     {
-        // Do all the regex magic here
-        $injected = preg_replace_callback(
-            '#<(h[1-'.$this->maxLevel.'])(.*?)>(.*?)</\1>#si',
-            // callback
-            function ($matches) use ($params) {
-                // the html tag
-                $tag = $matches[1];
-                // decode html entities to support special characters in headings/slug
-                $title = html_entity_decode(strip_tags($matches[3]));
-                $hasId = preg_match('/id=(["\'])(.*?)\1[\s>]/si', $matches[2], $matchedIds);
-                $id = $hasId ? $matchedIds[2] : $this->generateId($title, false);
-
-                if ($hasId) {
-                    return $matches[0];
-                }
-                if ($params && is_array($params)) {
-                    $params = implode(' ', $params);
-                } else {
-                    $params = '';
-                }
-
-                $params = str_replace('[id]', $id, $params);
-
-                // rebuild the tag with Id.
-                return sprintf('<%s%s id="%s" %s>%s</%s>', $tag, $matches[2], $id, $params, $matches[3], $tag);
-            },
-            $value
-        );
-
-        return $injected;
-    }
-
-    /**
-     * Slugifies a given title
-     *
-     * @return string [description]
-     */
-    private function generateId($title, $list = false): string
-    {
-        $id = $raw = Str::slug($title);
-        $count = 2;
-        $suffix = $list ? 'list' : 'text';
-
-        // make sure we don't have any duplicate ids via adding a counter at
-        // the end of an id if it already exists.
-        while ($this->slugs->contains($id.'-'.$suffix)) {
-            $id = $raw.'-'.$count;
-            $count++;
+        if (! is_string($value)) {
+            return (string) $value;
         }
 
-        $this->slugs->push($id.'-'.$suffix);
+        $extracted = (new Detector)->for($value)->extract($value);
 
-        return $id;
+        $attributes = is_array($params) ? implode(' ', $params) : $params;
+
+        return (new IdInjector)->inject(
+            $value,
+            app(Registry::class)->anchorsFor($extracted),
+            $attributes ?: null
+        );
     }
 }

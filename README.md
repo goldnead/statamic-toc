@@ -1,5 +1,6 @@
 [![Latest Version](https://img.shields.io/github/v/release/goldnead/statamic-toc?style=flat-square)](https://github.com/goldnead/statamic-toc/releases)
-![Statamic v3](https://img.shields.io/badge/Statamic-3+-FF269E)
+![Statamic v5+](https://img.shields.io/badge/Statamic-5%20|%206-FF269E)
+![PHP 8.2+](https://img.shields.io/badge/PHP-8.2+-777BB4)
 ![workflow](https://github.com/goldnead/statamic-toc/actions/workflows/tests.yaml/badge.svg)
 
 # Statamic ToC
@@ -41,6 +42,9 @@ composer require goldnead/statamic-toc
 ```
 
 No further Vendor-Publishing or config files are needed.
+
+Requires PHP 8.2 and Statamic 5 or 6. For Statamic 3 or 4, stay on `^1.9`.
+Upgrading from v1? See [UPGRADE.md](UPGRADE.md).
 
 ## Usage
 
@@ -130,6 +134,12 @@ Then you get something like this:
 
 !> Note: When headings are duplicated, the ID is suffixed with a number preventing duplicated IDs which would be semantially wrong in HTML.
 
+If a heading already has an ID, from Bard's anchor button or from hand-written HTML, that ID is
+kept and the table of contents links to it. The modifier never adds a second one.
+
+The tag and the modifier take their IDs from the same place, so the list and the headings always
+agree, whatever `from`, `depth` or `exclude` are set to.
+
 ### The `toc` Tag
 
 You can use the `toc`-Tag like you would use any recursive tag (like the `nav` Tag) in your Antler-Templates:
@@ -213,6 +223,38 @@ instead of publishing it, add the addon path to the content sources in your Tail
 The partial only renders the list. The anchors point at the IDs the modifier injects, so the content
 field itself still needs `{{ your_field | toc }}`.
 
+### Configuration
+
+Optional. The addon works without it. To change the defaults, publish the config:
+
+```bash
+php artisan vendor:publish --tag=statamic-toc-config
+```
+
+```php
+// config/statamic-toc.php
+return [
+    'field' => 'article',  // the field the tag reads when none is given
+    'from'  => 'h1',       // the level the list starts at
+    'depth' => 3,          // how many levels it spans, counted from "from"
+    'to'    => null,       // absolute end level; wins over "depth" when set
+    'flat'  => false,      // flat array instead of a nested tree
+];
+```
+
+Tag parameters always win over the config.
+
+### Heading levels
+
+`from` is the level the list starts at, `to` the level it stops at, both absolute:
+
+```
+{{ toc from="h2" to="h4" }}
+```
+
+`depth` says the same thing relative to `from`, and is what most templates use. `from="h2"` with
+`depth="3"` covers h2 to h4. When both `to` and `depth` are given, `to` wins.
+
 ### Excluding headings
 
 Pass `exclude` to leave individual headings out of the list. A comma-separated string matches
@@ -242,8 +284,8 @@ When it evaluates to `false`, the tag returns an empty list and `no_results` is 
 
 ### The `toc:count` Tag
 
-Returns the number of headings found. Pass it the same `field`, `depth` and `from` parameters as
-the list itself, otherwise it counts a different set:
+Returns the number of headings the list would show. Give it the same parameters as the list, and
+it reports the same number:
 
 ```
 {{ if {toc:count field="article" depth="3"} > 0 }}
@@ -283,10 +325,13 @@ You can control the behaviour with the following tag-parameters:
 | `is_flat` | When true the list will be displayed as a flat array without nested `children` | _(boolean)_ `false`          |
 | `field`   | The name of the bard-field.                                                    | _(string)_ `"article"`       |
 | `content` | Content of the bard-structure or HTML String                                   | _(string/array/null)_ `null` |
-| `from`    | The starting point from where the list should be outputted                     | _(string)_ `h1`              |
+| `from`    | The level the list starts at                                                    | _(string)_ `h1`              |
+| `to`      | The level the list stops at, absolute. Wins over `depth`                       | _(string/null)_ `null`       |
 | `exclude` | Comma-separated headings or a regex pattern to omit from the list              | _(string/null)_ `null`       |
 | `when`    | Returns an empty list when this evaluates to false                             | _(bool)_ `true`              |
 
 ## License
 
-This is commercial software. To use it in production you need to purchase a license at the [Statamic-Marketplace](https://statamic.com/addons).
+This is commercial software. To use it in production you need to purchase a license at the
+[Statamic Marketplace](https://statamic.com/addons/goldnead/toc-for-bard-and-markdown). The terms are
+in [LICENSE](LICENSE).

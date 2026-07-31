@@ -19,11 +19,8 @@ class MarkdownExtractor implements Extractor
 
     private function toHtml(string $markdown): string
     {
-        $converter = new CommonMarkConverter;
-
-        // convertToHtml() is deprecated in league/commonmark 2.x.
-        return method_exists($converter, 'convert')
-            ? (string) $converter->convert($markdown)
-            : (string) $converter->convertToHtml($markdown);
+        // convertToHtml() is deprecated in league/commonmark 2, which is the
+        // only major this package requires, so convert() is always there.
+        return (string) (new CommonMarkConverter)->convert($markdown);
     }
 }
