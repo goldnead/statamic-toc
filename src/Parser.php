@@ -30,8 +30,6 @@ class Parser
         if ($content) {
             $this->setContent($content);
         }
-
-        return $this;
     }
 
     /**
@@ -49,7 +47,7 @@ class Parser
      * Set the content to be parsed
      *
      * @param  string  $content
-     * @return void
+     * @return $this
      */
     public function setContent($content): object
     {
@@ -136,8 +134,8 @@ class Parser
 
     /**
      * Set the exclusion pattern
-     * 
-     * @param string|null $exclude
+     *
+     * @param  string|null  $exclude
      * @return $this
      */
     public function exclude($exclude)
@@ -163,7 +161,7 @@ class Parser
      * Sets the flattening only if the given parameter is true.
      *
      * @param  bool  $bool
-     * @return void
+     * @return $this
      */
     public function flattenIf($bool)
     {
@@ -336,7 +334,7 @@ class Parser
      * Recursive function to nest a list of headings using the keys 'id' & 'parent'.
      *
      * @param  int  $parent
-     * @return null|array
+     * @return array<int, array<string, mixed>>
      */
     private function nestHeadings($parent = 0)
     {

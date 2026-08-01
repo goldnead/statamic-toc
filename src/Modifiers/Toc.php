@@ -21,8 +21,8 @@ class Toc extends Modifier
      * its own. That is the whole point: the tag and this modifier read the same
      * decision, so an anchor cannot point at a heading that never got the id.
      *
-     * @param  mixed  $value    The value to be modified
-     * @param  array  $params   Any parameters used in the modifier
+     * @param  mixed  $value  The value to be modified
+     * @param  array  $params  Any parameters used in the modifier
      * @param  array  $context  Contextual values
      * @return mixed
      */

@@ -2,15 +2,27 @@
 
 namespace Goldnead\StatamicToc\Facades;
 
-use Illuminate\Support\Facades\Facade;
+use Goldnead\StatamicToc\Options;
 use Goldnead\StatamicToc\Parser;
+use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static int values($one, $two)
- * @method static int strings(string $one, string $two)
- * @method static int numbers($one, $two)
+ * @method static Parser make($content)
+ * @method static Parser setContent($content)
+ * @method static Parser options(Options $options)
+ * @method static Parser depth($depth)
+ * @method static Parser from($start)
+ * @method static Parser to($level)
+ * @method static Parser exclude($exclude)
+ * @method static Parser flatten()
+ * @method static Parser flattenIf($bool)
+ * @method static bool isHTML()
+ * @method static bool isBard()
+ * @method static bool isMarkdown()
+ * @method static array build()
+ * @method static string injectIds($value, $params = null)
  *
- * @see \Statamic\Support\Comparator
+ * @see Parser
  */
 class ParserFacade extends Facade
 {

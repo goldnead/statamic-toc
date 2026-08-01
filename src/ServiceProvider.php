@@ -2,9 +2,9 @@
 
 namespace Goldnead\StatamicToc;
 
-use Statamic\Providers\AddonServiceProvider;
-use Goldnead\StatamicToc\Tags\Toc as TocTag;
 use Goldnead\StatamicToc\Modifiers\Toc as TocModifier;
+use Goldnead\StatamicToc\Tags\Toc as TocTag;
+use Statamic\Providers\AddonServiceProvider;
 
 class ServiceProvider extends AddonServiceProvider
 {
@@ -16,12 +16,17 @@ class ServiceProvider extends AddonServiceProvider
         TocModifier::class,
     ];
 
+    /**
+     * The parent registers the view namespace off this property. No explicit
+     * loadViewsFrom() is needed alongside it, and adding one registers the same
+     * namespace twice.
+     */
     protected $viewNamespace = 'statamic-toc';
 
     /**
-     * The parent boots config and views off the addon directory, which is
-     * resolved through the manifest and comes up empty in package test suites.
-     * Both are registered explicitly below with absolute paths instead.
+     * The parent boots config off the addon directory, which is resolved through
+     * the manifest and comes up empty in package test suites. Config is merged
+     * explicitly in register() with an absolute path instead.
      */
     protected $config = false;
 
@@ -41,8 +46,6 @@ class ServiceProvider extends AddonServiceProvider
         $this->publishes([
             __DIR__.'/../config/statamic-toc.php' => config_path('statamic-toc.php'),
         ], 'statamic-toc-config');
-
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'statamic-toc');
 
         // The parent's $publishables maps into public_path(), which is meant for
         // assets. Views belong in the project's view folder.
