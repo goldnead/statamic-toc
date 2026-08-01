@@ -3,11 +3,17 @@
 ![PHP 8.2+](https://img.shields.io/badge/PHP-8.2+-777BB4)
 ![workflow](https://github.com/goldnead/statamic-toc/actions/workflows/tests.yaml/badge.svg)
 
+<!-- statamic:hide -->
 # Statamic ToC
 
-Automatic Table Of Contents for Statamic Bard or Markdown fields or other HTML content
+> Builds a table of contents from Bard, Markdown or plain HTML content, and injects the matching heading anchors.
+<!-- /statamic:hide -->
 
-This addon generates a Table-Of-Contents (ToC) for any Bard- or Markdown-Field in Statamic. Just like any Antlers-Tag you can use this addon in your templates with the usual Statamic-Magic Sugar:
+The addon reads the headings out of a field and hands them to your template as a nested array. A
+companion modifier writes the matching `id` attributes into the rendered content, so every entry in
+the table of contents points at a heading that actually exists.
+
+It is an ordinary Antlers tag:
 
 ```html
 <div class="max-w-md mx-auto">
@@ -31,7 +37,15 @@ This addon generates a Table-Of-Contents (ToC) for any Bard- or Markdown-Field i
 </div>
 ```
 
-Sweet, isn't it?
+## Requirements
+
+| | |
+|---|---|
+| PHP | 8.2 or newer |
+| Statamic | 5 or 6 |
+
+Statamic 3 and 4 are no longer supported. The v1 line ends at `v1.10`, which stays installable but
+receives no further fixes. Upgrading from v1? See [UPGRADE.md](UPGRADE.md).
 
 ## Installation
 
@@ -41,11 +55,18 @@ Install via composer:
 composer require goldnead/statamic-toc
 ```
 
-No further Vendor-Publishing or config files are needed.
+The addon works with no configuration. Publish the config only if you want to change the defaults
+(see [Configuration](#configuration)):
 
-Requires PHP 8.2 and Statamic 5 or 6. Statamic 3 and 4 are no longer supported: the v1 line
-ends at `v1.10`, which stays installable but receives no further fixes.
-Upgrading from v1? See [UPGRADE.md](UPGRADE.md).
+```bash
+php artisan vendor:publish --tag=statamic-toc-config
+```
+
+## Support
+
+Only the latest version of this addon is supported. Bugs and questions belong in the
+[issue tracker](https://github.com/goldnead/statamic-toc/issues); bugs in Statamic itself belong in
+[statamic/cms](https://github.com/statamic/cms/issues).
 
 ## Usage
 
@@ -330,6 +351,28 @@ You can control the behaviour with the following tag-parameters:
 | `to`      | The level the list stops at, absolute. Wins over `depth`                       | _(string/null)_ `null`       |
 | `exclude` | Comma-separated headings or a regex pattern to omit from the list              | _(string/null)_ `null`       |
 | `when`    | Returns an empty list when this evaluates to false                             | _(bool)_ `true`              |
+
+### Using the parser from PHP
+
+The same parser the tag uses is available as a facade, for cases where the table of contents has to
+be built outside a template — a feed, an API response, a command:
+
+```php
+use Goldnead\StatamicToc\Facades\ParserFacade;
+
+$toc = ParserFacade::make($html)
+    ->depth(3)
+    ->from('h2')
+    ->exclude('Footnotes')
+    ->build();
+```
+
+`make()` accepts a Bard array, a Markdown string or an HTML string; the source is detected. Every
+setter returns the parser, `build()` returns the nested array. `injectIds($html)` returns the same
+content with the heading anchors written in.
+
+Each call to `make()` starts a fresh parse. Two calls with different depths do not interfere with
+each other.
 
 ## License
 
