@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Goldnead\StatamicToc\Tests\Unit;
 
 use Goldnead\StatamicToc\Facades\ParserFacade;
 use Goldnead\StatamicToc\Modifiers\Toc as TocModifier;
@@ -42,7 +42,7 @@ class AnchorIntegrityTest extends TestCase
     {
         $html = '<h1>A</h1><h2>B</h2><h3>C</h3><h4>D</h4><h5>E</h5><h6>F</h6>';
 
-        $list = (new Parser())->make($html)->depth(6)->build();
+        $list = (new Parser)->make($html)->depth(6)->build();
         $output = $this->modify($html);
 
         $this->assertNotEmpty($list);
@@ -118,7 +118,7 @@ class AnchorIntegrityTest extends TestCase
     {
         $html = '<h2 id="mine">Kept</h2>';
 
-        $list = $this->flatten((new Parser())->make($html)->depth(6)->build());
+        $list = $this->flatten((new Parser)->make($html)->depth(6)->build());
         $output = $this->modify($html);
 
         // Whichever of the two wins, they have to agree. An element carrying
@@ -126,7 +126,6 @@ class AnchorIntegrityTest extends TestCase
         $this->assertSame($list[0]['toc_id'], 'mine');
         $this->assertStringContainsString('id="mine"', $output);
     }
-
 
     public function test_a_heading_whose_attrs_are_an_object_does_not_crash_the_id_lookup()
     {
@@ -138,7 +137,7 @@ class AnchorIntegrityTest extends TestCase
             'content' => [['type' => 'text', 'text' => 'Kept']],
         ];
 
-        $this->assertIsArray((new Parser())->make([$node])->build());
+        $this->assertIsArray((new Parser)->make([$node])->build());
     }
 
     // ------------------------------------------------------------ helpers

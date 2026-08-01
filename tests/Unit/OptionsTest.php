@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Goldnead\StatamicToc\Tests\Unit;
 
 use Goldnead\StatamicToc\Options;
 use Goldnead\StatamicToc\Parser;

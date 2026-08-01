@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Unit;
+namespace Goldnead\StatamicToc\Tests\Unit;
 
-use Goldnead\StatamicToc\Tests\TestCase;
 use Goldnead\StatamicToc\Tags\Toc as TocTag;
+use Goldnead\StatamicToc\Tests\TestCase;
 use Statamic\Facades\Antlers;
 
 class RecursionTest extends TestCase

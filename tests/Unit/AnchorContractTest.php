@@ -1,7 +1,8 @@
 <?php
 
-namespace Tests\Unit;
+namespace Goldnead\StatamicToc\Tests\Unit;
 
+use Goldnead\StatamicToc\Parser;
 use Goldnead\StatamicToc\ServiceProvider;
 use Statamic\Facades\Antlers;
 use Statamic\Testing\AddonTestCase;
@@ -223,7 +224,7 @@ class AnchorContractTest extends AddonTestCase
 
     private function listFor(string $html, ?callable $configure = null): array
     {
-        $parser = (new \Goldnead\StatamicToc\Parser)->make($html)->depth(6)->flatten();
+        $parser = (new Parser)->make($html)->depth(6)->flatten();
 
         if ($configure) {
             $configure($parser);

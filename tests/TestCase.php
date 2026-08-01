@@ -2,19 +2,22 @@
 
 namespace Goldnead\StatamicToc\Tests;
 
+use Faker\Factory;
+use Goldnead\StatamicToc\ServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Statamic\Extend\Manifest;
 use Statamic\Fields\Value;
 use Statamic\Fieldtypes\Bard;
+use Statamic\Providers\StatamicServiceProvider;
 use Statamic\Statamic;
 
 class TestCase extends OrchestraTestCase
 {
     protected function setUp(): void
     {
-        //require_once(__DIR__ . '/ExceptionHandler.php');
+        // require_once(__DIR__ . '/ExceptionHandler.php');
         parent::setUp();
-        $this->faker = \Faker\Factory::create();
+        $this->faker = Factory::create();
     }
 
     protected function getEnvironmentSetUp($app)
@@ -35,8 +38,8 @@ class TestCase extends OrchestraTestCase
     protected function getPackageProviders($app)
     {
         return [
-            \Statamic\Providers\StatamicServiceProvider::class,
-            \Goldnead\StatamicToc\ServiceProvider::class,
+            StatamicServiceProvider::class,
+            ServiceProvider::class,
         ];
     }
 
