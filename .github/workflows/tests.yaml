@@ -2,11 +2,14 @@ name: Test Suite
 
 on:
   push:
+    branches: [main, '*.x']
   pull_request:
+
+permissions: {}
 
 jobs:
   php_tests:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
@@ -14,50 +17,145 @@ jobs:
         include:
           # Every laravel/framework release below 12 carries unpatched security
           # advisories, which Composer refuses to install. Statamic 5 supports
-          # Laravel 12 since 5.66, so the Statamic 5 leg runs there.
+          # Laravel 12 since 5.66, so the Statamic 5 leg runs there. That is why
+          # there is no Laravel axis in this matrix: there is only one installable
+          # Laravel major for the range this package declares.
           - php: "8.2"
             statamic: "5.*"
             laravel: "12.*"
             testbench: "10.*"
-            os: ubuntu-latest
+            stability: prefer-stable
           - php: "8.3"
             statamic: "5.*"
             laravel: "12.*"
             testbench: "10.*"
-            os: ubuntu-latest
+            stability: prefer-stable
           - php: "8.2"
             statamic: "6.*"
             laravel: "12.*"
             testbench: "10.*"
-            os: ubuntu-latest
+            stability: prefer-stable
           - php: "8.3"
             statamic: "6.*"
             laravel: "12.*"
             testbench: "10.*"
-            os: ubuntu-latest
+            stability: prefer-stable
           - php: "8.4"
             statamic: "6.*"
             laravel: "12.*"
             testbench: "10.*"
-            os: ubuntu-latest
+            stability: prefer-stable
+          # The floor of the declared range. Without this leg the constraints in
+          # composer.json are a claim nobody verifies. Resolves to statamic/cms
+          # v6.21 today and is green.
+          - php: "8.2"
+            statamic: "6.*"
+            laravel: "12.*"
+            testbench: "10.*"
+            stability: prefer-lowest
 
-    name: PHP ${{ matrix.php }} - Statamic ${{ matrix.statamic }}
+    name: PHP ${{ matrix.php }} · Statamic ${{ matrix.statamic }} · ${{ matrix.stability }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           tools: composer:v2
+          coverage: none
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
 
       - name: Install dependencies
         run: |
           composer require "laravel/framework:${{ matrix.laravel }}" "statamic/cms:${{ matrix.statamic }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-          composer install --no-interaction
+          composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
       - name: Run PHPUnit
         run: composer test
+
+  lint:
+    runs-on: ubuntu-latest
+    name: Code style
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+
+      - run: composer install --prefer-dist --no-interaction
+
+      # Check, never fix. Auto-committing style fixes onto a contributor's branch
+      # rewrites their work without asking.
+      - run: vendor/bin/pint --test
+
+  static_analysis:
+    runs-on: ubuntu-latest
+    name: Static analysis
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+
+      - run: composer install --prefer-dist --no-interaction
+
+      - run: vendor/bin/phpstan analyse --no-progress
+
+  standards:
+    runs-on: ubuntu-latest
+    name: Addon standards
+
+    # Needs a STUDIO_TOKEN repo secret with read access to the private
+    # goldnead/statamic-addon-studio repo. Without it the job skips rather than
+    # fails, so a fork or an unconfigured repo does not go red for the wrong reason.
+    steps:
+      - name: Check for studio access
+        id: gate
+        env:
+          STUDIO_TOKEN: ${{ secrets.STUDIO_TOKEN }}
+        run: |
+          if [ -n "$STUDIO_TOKEN" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "STUDIO_TOKEN is not configured — skipping addon-lint."
+          fi
+
+      - if: steps.gate.outputs.available == 'true'
+        uses: actions/checkout@v4
+        with:
+          path: addon
+          persist-credentials: false
+
+      - if: steps.gate.outputs.available == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: goldnead/statamic-addon-studio
+          path: studio
+          token: ${{ secrets.STUDIO_TOKEN }}
+          persist-credentials: false
+
+      - if: steps.gate.outputs.available == 'true'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+
+      - name: Run addon-lint
+        if: steps.gate.outputs.available == 'true'
+        run: php studio/tools/addon-lint/bin/addon-lint addon --no-color --fail-on=major -v
