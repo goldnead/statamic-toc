@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#06B6D4"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#082F49" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+
+  <!-- rounded square background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- page -->
+  <g filter="url(#sh)">
+    <rect x="112" y="112" width="288" height="288" rx="36" fill="#FFFFFF"/>
+  </g>
+  <!-- top-level entries -->
+  <g fill="url(#bg)">
+    <rect x="150" y="162" width="26" height="26" rx="8"/>
+    <rect x="192" y="166" width="166" height="18" rx="9"/>
+    <rect x="150" y="320" width="26" height="26" rx="8"/>
+    <rect x="192" y="324" width="138" height="18" rx="9"/>
+  </g>
+  <!-- nested entries -->
+  <g fill="url(#bg)" opacity="0.5">
+    <rect x="188" y="222" width="20" height="20" rx="6"/>
+    <rect x="224" y="224" width="134" height="16" rx="8"/>
+    <rect x="188" y="270" width="20" height="20" rx="6"/>
+    <rect x="224" y="272" width="106" height="16" rx="8"/>
+  </g>
+</svg>
