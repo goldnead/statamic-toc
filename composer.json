@@ -1,8 +1,14 @@
 {
   "name": "goldnead/statamic-toc",
-  "description": "Automatic Table Of Contents Generator for Statamic Bard-Fields.",
+  "description": "Automatic table of contents generator for Statamic Bard, Markdown and HTML fields.",
   "type": "statamic-addon",
   "license": "proprietary",
+  "keywords": [
+    "statamic",
+    "statamic-addon",
+    "table-of-contents",
+    "bard"
+  ],
   "autoload": {
     "psr-4": {
       "Goldnead\\StatamicToc\\": "src/"
@@ -15,8 +21,12 @@
   },
   "extra": {
     "statamic": {
+      "slug": "statamic-toc",
       "name": "Statamic ToC",
-      "description": "Automatic Table Of Contents Generator for Statamic Bard-Fields."
+      "description": "Automatic table of contents generator for Statamic Bard, Markdown and HTML fields.",
+      "url": "https://github.com/goldnead/statamic-toc",
+      "developer": "Adrian Goldner",
+      "developer-url": "https://gldnr.studio"
     },
     "laravel": {
       "providers": [
@@ -26,17 +36,24 @@
   },
   "authors": [
     {
-      "name": "goldnead",
-      "email": "adrian.goldner@gmail.com"
+      "name": "Adrian Goldner",
+      "email": "info@adriangoldner.com"
     }
   ],
+  "support": {
+    "issues": "https://github.com/goldnead/statamic-toc/issues",
+    "source": "https://github.com/goldnead/statamic-toc"
+  },
   "require": {
     "php": "^8.2",
     "statamic/cms": "^5.0 | ^6.0",
     "league/commonmark": "^2.0"
   },
   "require-dev": {
-    "orchestra/testbench": "^5.0 | ^6.0 | ^7.0 | 8.x | 9.x",
+    "larastan/larastan": "^3.0",
+    "laravel/pint": "^1.18",
+    "orchestra/testbench": "^9.0 | ^10.0",
+    "phpunit/phpunit": "^10.5 | ^11.0",
     "spatie/test-time": "^1.2"
   },
   "config": {
@@ -50,7 +67,13 @@
       "php -d memory_limit=-1 -d max_execution_time=0 ./vendor/bin/phpunit"
     ],
     "lint": [
-      "php-cs-fixer fix ./src"
+      "./vendor/bin/pint --test"
+    ],
+    "fix": [
+      "./vendor/bin/pint"
+    ],
+    "analyse": [
+      "./vendor/bin/phpstan analyse"
     ]
   }
 }

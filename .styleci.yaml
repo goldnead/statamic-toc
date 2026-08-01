@@ -1,4 +1,0 @@
-preset: laravel
-risky: false
-disabled:
-  - cast_spaces

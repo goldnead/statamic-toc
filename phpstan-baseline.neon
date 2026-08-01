@@ -1,0 +1,5 @@
+# Empty on purpose: at level 5 the four findings from the first run were all real
+# (a constructor returning $this, three wrong docblocks) and were fixed rather
+# than ignored. A new entry here needs a written reason next to it.
+parameters:
+    ignoreErrors: []

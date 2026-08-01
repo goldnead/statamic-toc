@@ -1,0 +1,12 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    level: 5
+
+    paths:
+        - src
+
+    # A ratchet for new code. The baseline is empty because the findings from the
+    # first run were fixed; keep it that way rather than appending to it.
