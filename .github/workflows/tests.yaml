@@ -116,46 +116,10 @@ jobs:
 
       - run: vendor/bin/phpstan analyse --no-progress
 
-  standards:
-    runs-on: ubuntu-latest
-    name: Addon standards
-
-    # Needs a STUDIO_TOKEN repo secret with read access to the private
-    # goldnead/statamic-addon-studio repo. Without it the job skips rather than
-    # fails, so a fork or an unconfigured repo does not go red for the wrong reason.
-    steps:
-      - name: Check for studio access
-        id: gate
-        env:
-          STUDIO_TOKEN: ${{ secrets.STUDIO_TOKEN }}
-        run: |
-          if [ -n "$STUDIO_TOKEN" ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "STUDIO_TOKEN is not configured — skipping addon-lint."
-          fi
-
-      - if: steps.gate.outputs.available == 'true'
-        uses: actions/checkout@v4
-        with:
-          path: addon
-          persist-credentials: false
-
-      - if: steps.gate.outputs.available == 'true'
-        uses: actions/checkout@v4
-        with:
-          repository: goldnead/statamic-addon-studio
-          path: studio
-          token: ${{ secrets.STUDIO_TOKEN }}
-          persist-credentials: false
-
-      - if: steps.gate.outputs.available == 'true'
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.3"
-          coverage: none
-
-      - name: Run addon-lint
-        if: steps.gate.outputs.available == 'true'
-        run: php studio/tools/addon-lint/bin/addon-lint addon --no-color --fail-on=major -v
+# Der Job "standards" (addon-lint) lag hier und ist am 01.08.2026 entfernt worden.
+# Er klonte das private goldnead/statamic-addon-studio ueber ein STUDIO_TOKEN-Secret.
+# Ohne das Secret uebersprang er sich still bzw. scheiterte am Checkout -- also genau
+# die Sorte Job, die gruen aussieht und nichts geprueft hat. addon-lint bleibt das
+# zentrale Release-Gate im Studio (tools/verify-gate.sh faehrt es ueber alle Repos).
+# Wieder hierher zurueck, sobald addon-lint als eigenes Paket auf Packagist liegt --
+# dann braucht es kein Secret mehr.
