@@ -2,12 +2,15 @@
 
 namespace Goldnead\StatamicToc\Tests\Unit;
 
+use Goldnead\StatamicToc\ServiceProvider;
 use Goldnead\StatamicToc\Tags\Toc as TocTag;
-use Goldnead\StatamicToc\Tests\TestCase;
 use Statamic\Facades\Antlers;
+use Statamic\Testing\AddonTestCase;
 
-class RecursionTest extends TestCase
+class RecursionTest extends AddonTestCase
 {
+    protected string $addonServiceProvider = ServiceProvider::class;
+
     protected $tag;
 
     protected function setUp(): void

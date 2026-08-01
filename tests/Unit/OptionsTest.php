@@ -4,10 +4,13 @@ namespace Goldnead\StatamicToc\Tests\Unit;
 
 use Goldnead\StatamicToc\Options;
 use Goldnead\StatamicToc\Parser;
-use Goldnead\StatamicToc\Tests\TestCase;
+use Goldnead\StatamicToc\ServiceProvider;
+use Statamic\Testing\AddonTestCase;
 
-class OptionsTest extends TestCase
+class OptionsTest extends AddonTestCase
 {
+    protected string $addonServiceProvider = ServiceProvider::class;
+
     private function levels(array $tree): array
     {
         $levels = [];

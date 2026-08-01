@@ -2,14 +2,20 @@
 
 namespace Goldnead\StatamicToc\Tests\Unit;
 
+use Goldnead\StatamicToc\ServiceProvider;
 use Goldnead\StatamicToc\Tags\Toc as TocTag;
-use Goldnead\StatamicToc\Tests\TestCase;
+use Goldnead\StatamicToc\Tests\Concerns\CreatesContent;
 use Statamic\Facades\Antlers;
 use Statamic\Fields\Value;
 use Statamic\Fieldtypes\Bard;
+use Statamic\Testing\AddonTestCase;
 
-class TagTest extends TestCase
+class TagTest extends AddonTestCase
 {
+    use CreatesContent;
+
+    protected string $addonServiceProvider = ServiceProvider::class;
+
     public $tag;
 
     protected function setUp(): void

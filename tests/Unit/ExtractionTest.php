@@ -6,10 +6,13 @@ use Goldnead\StatamicToc\Extractors\BardExtractor;
 use Goldnead\StatamicToc\Extractors\Detector;
 use Goldnead\StatamicToc\Extractors\HtmlExtractor;
 use Goldnead\StatamicToc\Extractors\MarkdownExtractor;
-use Goldnead\StatamicToc\Tests\TestCase;
+use Goldnead\StatamicToc\ServiceProvider;
+use Statamic\Testing\AddonTestCase;
 
-class ExtractionTest extends TestCase
+class ExtractionTest extends AddonTestCase
 {
+    protected string $addonServiceProvider = ServiceProvider::class;
+
     private function titles(array $headings): array
     {
         return array_map(fn ($h) => $h->title, $headings);

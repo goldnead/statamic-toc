@@ -3,21 +3,22 @@
 namespace Goldnead\StatamicToc\Tests\Unit;
 
 use Goldnead\StatamicToc\ServiceProvider;
-use Statamic\Facades\Antlers;
+use Goldnead\StatamicToc\Tests\Concerns\RendersAntlers;
 use Statamic\Testing\AddonTestCase;
 
 class ConfigTest extends AddonTestCase
 {
+    use RendersAntlers;
+
     protected string $addonServiceProvider = ServiceProvider::class;
 
     private const DOCUMENT = '<h1>Eins</h1><h2>Zwei</h2><h3>Drei</h3><h4>Vier</h4><h5>Fünf</h5>';
 
     private function titles(string $params = '', array $context = []): array
     {
-        $out = (string) Antlers::parse(
+        $out = $this->render(
             '{{ toc '.$params.' }}[{{ toc_title }}]{{ if children }}{{ *recursive children* }}{{ /if }}{{ /toc }}',
-            $context + ['article' => self::DOCUMENT],
-            true
+            $context + ['article' => self::DOCUMENT]
         );
 
         preg_match_all('/\[([^\]]+)\]/', $out, $m);
@@ -76,10 +77,9 @@ class ConfigTest extends AddonTestCase
 
         // Flat means no nesting, so the recursive block never fires and every
         // heading in range shows up at the top level.
-        $out = (string) Antlers::parse(
+        $out = $this->render(
             '{{ toc }}[{{ toc_title }}{{ if children }}+kinder{{ /if }}]{{ /toc }}',
-            ['article' => self::DOCUMENT],
-            true
+            ['article' => self::DOCUMENT]
         );
 
         $this->assertStringNotContainsString('+kinder', $out);

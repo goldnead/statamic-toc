@@ -3,23 +3,14 @@
 namespace Goldnead\StatamicToc\Tests\Unit;
 
 use Goldnead\StatamicToc\ServiceProvider;
-use Statamic\Facades\Antlers;
+use Goldnead\StatamicToc\Tests\Concerns\RendersAntlers;
 use Statamic\Testing\AddonTestCase;
 
 class StarterKitTest extends AddonTestCase
 {
-    // Statamic's own harness. The hand-rolled TestCase in this repo never boots
-    // the addon: its manifest fixture has no 'autoload' or 'provider' key, so
-    // AddonServiceProvider::boot() returns early and the view namespace is
-    // never registered.
-    protected string $addonServiceProvider = ServiceProvider::class;
+    use RendersAntlers;
 
-    private function render(string $template, array $context = []): string
-    {
-        // The third argument marks the template as trusted. Without it Antlers
-        // treats the string as user data and skips every tag.
-        return (string) Antlers::parse($template, $context, true);
-    }
+    protected string $addonServiceProvider = ServiceProvider::class;
 
     private function article(): string
     {
