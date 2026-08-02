@@ -16,13 +16,14 @@ use Statamic\Testing\AddonTestCase;
  *   modifier actually injected, and every heading the modifier touches is
  *   reachable.
  *
- * Nothing enforced it so far. Tag and modifier each run their own Parser with
- * their own slug registry and agree only by coincidence, kept apart by the
+ * In v1 nothing enforced it. Tag and modifier each ran their own Parser with
+ * their own slug registry and agreed only by coincidence, kept apart by the
  * '-list' and '-text' suffixes in Parser::generateId(). Where the coincidence
- * breaks, the table of contents links into the void.
+ * broke, the table of contents linked into the void.
  *
- * These tests describe the target state. They are expected to fail until the
- * v2 rework puts both sides on one shared registry.
+ * Since v2 both sides read one shared Registry, so these tests pass. They are
+ * kept as the guard on that arrangement: each one names a case where the two
+ * sides used to drift apart, and stays here so they cannot drift again.
  */
 class AnchorContractTest extends AddonTestCase
 {
@@ -94,6 +95,25 @@ class AnchorContractTest extends AddonTestCase
 
         $unreachable = array_values(array_diff($this->ids($html), $this->anchors($html)));
         $this->assertSame([], $unreachable, $because."\nHeadings the list cannot reach: ".implode(', ', $unreachable));
+
+        // Cheap to check and easy to lose: a heading can satisfy both halves
+        // above and still be invalid HTML, because a second id was appended next
+        // to the one that already matched. Browsers keep the first, so nothing
+        // looks broken until the ids drift apart.
+        $this->assertNoHeadingCarriesTwoIds($html);
+    }
+
+    private function assertNoHeadingCarriesTwoIds(string $html)
+    {
+        preg_match_all('/<h[1-6]\b[^>]*>/i', $html, $tags);
+
+        foreach ($tags[0] as $tag) {
+            $this->assertLessThan(
+                2,
+                preg_match_all('/\bid\s*=\s*["\']/i', $tag),
+                'A heading must not end up with two id attributes: '.$tag
+            );
+        }
     }
 
     /**
@@ -165,15 +185,7 @@ class AnchorContractTest extends AddonTestCase
         // HTML, and the browser keeps the first id, not the one the list links to.
         $html = $this->page('<h2 id="atemstuetze">Atem und Stütze</h2>');
 
-        preg_match_all('/<h[1-6]\b[^>]*>/i', $html, $tags);
-
-        foreach ($tags[0] as $tag) {
-            $this->assertLessThan(
-                2,
-                preg_match_all('/\bid\s*=\s*["\']/i', $tag),
-                'A heading must not end up with two id attributes: '.$tag
-            );
-        }
+        $this->assertNoHeadingCarriesTwoIds($html);
     }
 
     public function test_two_fields_on_one_page_stay_independent()
