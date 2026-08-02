@@ -3,10 +3,16 @@
 namespace Goldnead\StatamicToc\Tests\Unit;
 
 use Goldnead\StatamicToc\Parser;
-use Goldnead\StatamicToc\Tests\TestCase;
+use Goldnead\StatamicToc\ServiceProvider;
+use Goldnead\StatamicToc\Tests\Concerns\CreatesContent;
+use Statamic\Testing\AddonTestCase;
 
-class ParserTest extends TestCase
+class ParserTest extends AddonTestCase
 {
+    use CreatesContent;
+
+    protected string $addonServiceProvider = ServiceProvider::class;
+
     public $parser;
 
     public function test_can_detect_html()

@@ -3,11 +3,17 @@
 namespace Goldnead\StatamicToc\Tests\Unit;
 
 use Goldnead\StatamicToc\Modifiers\Toc;
-use Goldnead\StatamicToc\Tests\TestCase;
+use Goldnead\StatamicToc\ServiceProvider;
+use Goldnead\StatamicToc\Tests\Concerns\CreatesContent;
 use Statamic\Fields\Value;
+use Statamic\Testing\AddonTestCase;
 
-class ModifierTest extends TestCase
+class ModifierTest extends AddonTestCase
 {
+    use CreatesContent;
+
+    protected string $addonServiceProvider = ServiceProvider::class;
+
     public $modifier;
 
     protected function setUp(): void

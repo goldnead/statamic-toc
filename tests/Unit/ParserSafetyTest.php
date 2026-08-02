@@ -3,10 +3,13 @@
 namespace Goldnead\StatamicToc\Tests\Unit;
 
 use Goldnead\StatamicToc\Parser;
-use Goldnead\StatamicToc\Tests\TestCase;
+use Goldnead\StatamicToc\ServiceProvider;
+use Statamic\Testing\AddonTestCase;
 
-class ParserSafetyTest extends TestCase
+class ParserSafetyTest extends AddonTestCase
 {
+    protected string $addonServiceProvider = ServiceProvider::class;
+
     public function test_handles_heading_with_missing_attrs()
     {
         $content = [
