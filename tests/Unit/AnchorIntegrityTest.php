@@ -5,8 +5,9 @@ namespace Goldnead\StatamicToc\Tests\Unit;
 use Goldnead\StatamicToc\Facades\ParserFacade;
 use Goldnead\StatamicToc\Modifiers\Toc as TocModifier;
 use Goldnead\StatamicToc\Parser;
-use Goldnead\StatamicToc\Tests\TestCase;
+use Goldnead\StatamicToc\ServiceProvider;
 use Statamic\Fields\Value;
+use Statamic\Testing\AddonTestCase;
 
 /**
  * The three ways an anchor could end up pointing at nothing.
@@ -15,8 +16,10 @@ use Statamic\Fields\Value;
  * the list and the page does not move. They have three different causes, so
  * they get three groups of tests.
  */
-class AnchorIntegrityTest extends TestCase
+class AnchorIntegrityTest extends AddonTestCase
 {
+    protected string $addonServiceProvider = ServiceProvider::class;
+
     private function modify(string $html, $params = null): string
     {
         return resolve(TocModifier::class)->index(new Value($html), $params ?? []);

@@ -8,10 +8,13 @@ use Goldnead\StatamicToc\Extractors\BardExtractor;
 use Goldnead\StatamicToc\Extractors\HtmlExtractor;
 use Goldnead\StatamicToc\Heading;
 use Goldnead\StatamicToc\Registry;
-use Goldnead\StatamicToc\Tests\TestCase;
+use Goldnead\StatamicToc\ServiceProvider;
+use Statamic\Testing\AddonTestCase;
 
-class AnchorsTest extends TestCase
+class AnchorsTest extends AddonTestCase
 {
+    protected string $addonServiceProvider = ServiceProvider::class;
+
     // ---------------------------------------------------------------- Slugger
 
     public function test_slugs_are_unique_within_a_document()

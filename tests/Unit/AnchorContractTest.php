@@ -4,7 +4,7 @@ namespace Goldnead\StatamicToc\Tests\Unit;
 
 use Goldnead\StatamicToc\Parser;
 use Goldnead\StatamicToc\ServiceProvider;
-use Statamic\Facades\Antlers;
+use Goldnead\StatamicToc\Tests\Concerns\RendersAntlers;
 use Statamic\Testing\AddonTestCase;
 
 /**
@@ -24,17 +24,9 @@ use Statamic\Testing\AddonTestCase;
  */
 class AnchorContractTest extends AddonTestCase
 {
-    protected string $addonServiceProvider = ServiceProvider::class;
+    use RendersAntlers;
 
-    /**
-     * Renders a template the way a real page does. The third argument marks it
-     * as trusted; without it Antlers treats the string as user data and
-     * silently skips every tag.
-     */
-    private function render(string $template, array $context = []): string
-    {
-        return (string) Antlers::parse($template, $context, true);
-    }
+    protected string $addonServiceProvider = ServiceProvider::class;
 
     /**
      * The anchors the list links to, in order.
