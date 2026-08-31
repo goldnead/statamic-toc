@@ -2,6 +2,28 @@
 
 All notable changes to `statamic-toc` will be documented in this file.
 
+## 2026-08-09 v2.2.0
+
+Housekeeping release. **Nothing that ships changed**: no file under `src/`, `config/` or
+`resources/` differs from 2.1.0, so an install of 2.2.0 behaves exactly like 2.1.0. Every tag
+parameter and template variable is unchanged.
+
+### Changed — the test suite runs on Statamic's own AddonTestCase
+
+The 213-line hand-rolled `tests/TestCase.php` is gone. Fixtures moved into two traits,
+`CreatesContent` and `RendersAntlers`, and the suite now boots the way Statamic's own addon
+tests do. `HarnessTest` guards the harness itself, so a broken fixture fails loudly instead of
+silently skipping assertions.
+
+### Added — Marketplace listing artwork
+
+`art/` holds the product image (1280 × 800), cover and icon for the Marketplace listing.
+
+### Changed — `art/` and `screenshots/` are export-ignored
+
+Listing artwork has no business in a consumer's `vendor/` directory. The tarball is unchanged
+apart from this file.
+
 ## 2026-08-01 v2.1.0
 
 Housekeeping release. No template API changed; every tag parameter and template variable
