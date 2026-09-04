@@ -198,11 +198,11 @@ The `mb_convert_encoding(..., 'HTML-ENTITIES', ...)` deprecation notice on PHP 8
 - Support Level-Start
 - Refactor & document code.
 
-## 2021-07-08 v1.03
+## 2021-07-08 v1.0.3
 
 - Fix ToC not displaying in some situations.
 
-## 2021-07-07 v1.02
+## 2021-07-07 v1.0.2
 
 - Added support for HTML-Mode in Bard
 - Minor fixes
