@@ -20,16 +20,23 @@ jobs:
           # Laravel 12 since 5.66, so the Statamic 5 leg runs there. That is why
           # there is no Laravel axis in this matrix: there is only one installable
           # Laravel major for the range this package declares.
+          # `goldnead/statamic-brand-context` verlangt Statamic 6. Es traegt den
+          # Einstellungsbildschirm und ist deshalb nur eine Dev-Abhaengigkeit —
+          # auf Statamic 5 laeuft dieses Addon ohne ihn und ohne Bildschirm.
+          # Diese Legen belegen genau das: ohne den Nachbarn bleibt die Suite
+          # gruen, und `SettingsTest` sagt uebersprungen statt gruen.
           - php: "8.2"
             statamic: "5.*"
             laravel: "12.*"
             testbench: "10.*"
             stability: prefer-stable
+            brand_context: "no"
           - php: "8.3"
             statamic: "5.*"
             laravel: "12.*"
             testbench: "10.*"
             stability: prefer-stable
+            brand_context: "no"
           - php: "8.2"
             statamic: "6.*"
             laravel: "12.*"
@@ -72,6 +79,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+          if [ "${{ matrix.brand_context }}" = "no" ]; then
+            composer remove --dev goldnead/statamic-brand-context --no-interaction --no-update
+          fi
           composer require "laravel/framework:${{ matrix.laravel }}" "statamic/cms:${{ matrix.statamic }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 

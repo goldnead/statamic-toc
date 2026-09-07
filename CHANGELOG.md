@@ -2,6 +2,21 @@
 
 All notable changes to `statamic-toc` will be documented in this file.
 
+## Unveröffentlicht
+
+### Einstellungen im Control Panel
+
+Die fünf Vorgaben des `{{ toc }}`-Tags — Feld, erste Ebene, Anzahl der Ebenen, letzte Ebene und
+flache Liste — stehen unter **Einstellungen → Addon-Einstellungen**, sobald
+`goldnead/statamic-brand-context` (ab 1.12) danebenliegt. Bisher ging das nur über
+`config/statamic-toc.php`. Jeder Wert bleibt am Tag einzeln überschreibbar; was hier steht, ist
+die Vorgabe für alle übrigen Stellen. Neues Recht: `manage toc settings`.
+
+**Keine neue Pflicht-Abhängigkeit.** `statamic-brand-context` verlangt Statamic 6, dieses Addon
+läuft weiter auch auf Statamic 5. Ohne den Nachbarn meldet sich nichts an, und alles bleibt, wie
+es war. Wer den Bildschirm will, installiert ihn dazu:
+`composer require goldnead/statamic-brand-context`.
+
 ## 2026-08-09 v2.2.0
 
 Housekeeping release. **Nothing that ships changed**: no file under `src/`, `config/` or

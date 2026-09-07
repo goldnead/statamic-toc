@@ -49,7 +49,11 @@
     "statamic/cms": "^5.0 | ^6.0",
     "league/commonmark": "^2.0"
   },
+  "suggest": {
+    "goldnead/statamic-brand-context": "Schaltet den Einstellungsbildschirm unter Einstellungen → Addon-Einstellungen frei, auf dem die Vorgaben dieses Addons ohne Dateizugriff änderbar sind. Braucht Statamic 6."
+  },
   "require-dev": {
+    "goldnead/statamic-brand-context": "^1.12",
     "larastan/larastan": "^3.0",
     "laravel/pint": "^1.18",
     "orchestra/testbench": "^9.0 | ^10.0",

@@ -266,6 +266,20 @@ return [
 
 Tag parameters always win over the config.
 
+#### Editing the defaults in the Control Panel
+
+The same five values can be edited under **Settings → Addon settings** instead of in the file,
+once `goldnead/statamic-brand-context` is installed alongside:
+
+```bash
+composer require goldnead/statamic-brand-context
+```
+
+It is not a requirement of this addon, because it needs Statamic 6 while this addon still runs on
+Statamic 5. Without it nothing changes: the values come from the config file, as they always did.
+Only keys you actually change are stored, so a package update still moves the defaults. The screen
+is gated by the `manage toc settings` permission.
+
 ### Heading levels
 
 `from` is the level the list starts at, `to` the level it stops at, both absolute:
