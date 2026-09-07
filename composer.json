@@ -50,10 +50,10 @@
     "league/commonmark": "^2.0"
   },
   "suggest": {
-    "goldnead/statamic-brand-context": "Schaltet den Einstellungsbildschirm unter Einstellungen → Addon-Einstellungen frei, auf dem die Vorgaben dieses Addons ohne Dateizugriff änderbar sind. Braucht Statamic 6."
+    "goldnead/statamic-brand-context": "Schaltet den Einstellungsbildschirm unter Einstellungen → Addon-Einstellungen frei, auf dem die Vorgaben dieses Addons ohne Dateizugriff änderbar sind. Braucht Statamic 6 und mindestens Fassung 1.13; ältere verlieren beim zweiten Speichern die Überschreibung."
   },
   "require-dev": {
-    "goldnead/statamic-brand-context": "^1.12",
+    "goldnead/statamic-brand-context": "^1.13",
     "larastan/larastan": "^3.0",
     "laravel/pint": "^1.18",
     "orchestra/testbench": "^9.0 | ^10.0",
