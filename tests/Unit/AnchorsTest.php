@@ -10,6 +10,7 @@ use Goldnead\StatamicToc\Heading;
 use Goldnead\StatamicToc\Registry;
 use Goldnead\StatamicToc\ServiceProvider;
 use Illuminate\Support\Facades\Log;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Statamic\Testing\AddonTestCase;
 
 class AnchorsTest extends AddonTestCase
@@ -163,6 +164,55 @@ class AnchorsTest extends AddonTestCase
 
         // And the extractor agrees on the count, which is the whole contract.
         $this->assertCount(2, (new HtmlExtractor)->extract($html));
+    }
+
+    /**
+     * The scan has to count what libxml counts. Every case here was measured
+     * against HtmlExtractor, which is the other half of the contract.
+     *
+     * @return array<string, array{string, int}>
+     */
+    public static function documents(): array
+    {
+        return [
+            'unclosed script swallows the rest' => ['<script>x<h2>A</h2><h2>B</h2>', 0],
+            'unclosed style swallows the rest' => ['<style>x{}<h2>A</h2><h2>B</h2>', 0],
+            'unclosed comment swallows the rest' => ['<!-- <h2>A</h2><h2>B</h2>', 0],
+            'comment marker in an attribute starts nothing' => ['<a title="<!--"><h2>A</h2></a><h2>B</h2> -->', 2],
+            'script in an attribute starts nothing' => ['<a title="<script>"><h2>A</h2></a><h2>B</h2><script>1</script>', 2],
+            'custom element named like script' => ['<script-x></script-x><h2>A</h2><h2>B</h2>', 2],
+            'uppercase closing tag' => ['<SCRIPT>x</SCRIPT><h2>A</h2>', 1],
+            'heading after closed script' => ['<script>"<h2>x</h2>"</script><h2>A</h2>', 1],
+        ];
+    }
+
+    #[DataProvider('documents')]
+    public function test_the_injector_counts_the_same_headings_as_the_extractor(string $html, int $expected)
+    {
+        $this->assertCount($expected, (new HtmlExtractor)->extract($html), 'extractor');
+
+        $anchors = array_map(fn ($i) => 'a'.$i, range(1, $expected));
+        $out = (new IdInjector)->inject($html, $anchors);
+
+        $this->assertSame($expected, substr_count($out, ' id="a'), 'injector: '.$out);
+    }
+
+    public function test_only_a_real_non_blank_id_attribute_counts()
+    {
+        $cases = [
+            '<h2 id=" ">T</h2>' => '<h2 id="t">T</h2>',
+            '<h2 id>T</h2>' => '<h2 id="t">T</h2>',
+            '<h2 id=>T</h2>' => '<h2 id="t">T</h2>',
+            '<h2 class="a"id="">T</h2>' => '<h2 class="a" id="t">T</h2>',
+            '<h2 title="my id=foo">T</h2>' => '<h2 title="my id=foo" id="t">T</h2>',
+            '<h2 title="a id=\'\'">T</h2>' => '<h2 title="a id=\'\'" id="t">T</h2>',
+            '<h2 ID="Mein">T</h2>' => '<h2 ID="Mein">T</h2>',
+            '<h2 id=mein>T</h2>' => '<h2 id=mein>T</h2>',
+        ];
+
+        foreach ($cases as $html => $expected) {
+            $this->assertSame($expected, (new IdInjector)->inject($html, ['t']), $html);
+        }
     }
 
     public function test_a_count_mismatch_between_headings_and_anchors_is_logged()

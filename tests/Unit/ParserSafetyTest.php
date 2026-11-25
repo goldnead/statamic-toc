@@ -4,6 +4,7 @@ namespace Goldnead\StatamicToc\Tests\Unit;
 
 use Goldnead\StatamicToc\Parser;
 use Goldnead\StatamicToc\ServiceProvider;
+use Illuminate\Support\Facades\Log;
 use Statamic\Testing\AddonTestCase;
 
 class ParserSafetyTest extends AddonTestCase
@@ -222,16 +223,26 @@ class ParserSafetyTest extends AddonTestCase
         $this->assertSame(3, $second[0]['total_results']);
     }
 
-    public function test_make_resets_options_set_on_the_previous_run()
+    public function test_a_regex_exclude_that_cannot_run_is_logged_not_swallowed()
     {
-        $html = '<h1>A</h1><h2>B</h2><h3>C</h3><h4>D</h4>';
+        Log::spy();
 
-        $parser = (new Parser)->flatten()->depth(1);
-        $parser->make($html);
-        $result = $parser->build();
+        // Catastrophic backtracking ends in a PCRE error: preg_match returns false.
+        $jit = ini_get('pcre.jit');
+        $limit = ini_get('pcre.backtrack_limit');
+        ini_set('pcre.jit', '0');
+        ini_set('pcre.backtrack_limit', '50');
+        $this->beforeApplicationDestroyed(function () use ($jit, $limit) {
+            ini_set('pcre.jit', $jit);
+            ini_set('pcre.backtrack_limit', $limit);
+        });
 
-        // The default range is levels 1 to 3, so three headings are listed.
-        // A leftover flat/depth(1) from the previous run would list only one.
-        $this->assertSame(3, $result[0]['total_results']);
+        $parser = (new Parser)->exclude('/(a+)+$/');
+        $parser->make('<h2>'.str_repeat('a', 40).'b</h2>');
+        $parser->build();
+
+        Log::shouldHaveReceived('warning')
+            ->with('statamic-toc: exclude pattern could not be applied', \Mockery::type('array'))
+            ->once();
     }
 }

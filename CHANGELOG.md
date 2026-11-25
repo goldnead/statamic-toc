@@ -21,8 +21,9 @@ es war. Wer den Bildschirm will, installiert ihn dazu:
 
 - Headings carrying a `data-id`, `data-heading-id` or `hx-id` attribute get an anchor again. Only a real `id` attribute with a non-empty value counts as an existing id.
 - `exclude` matches umlaut titles case-insensitively, so `exclude="über"` hits "Über uns". Regex excludes get the `u` modifier unless they already have it.
-- Calling `build()` twice on the same parser instance no longer doubles the list, and `make()` resets the options to their defaults.
-- A heading inside an HTML comment, `<script>` (JSON-LD) or `<style>` no longer shifts the anchors of every later heading: the injector skips them, as the extractor does. An empty `id=""` is replaced instead of duplicated, and a heading/anchor count mismatch is logged as a warning.
+- Calling `build()` twice on the same parser instance no longer doubles the list.
+- A heading inside an HTML comment, `<script>` (JSON-LD) or `<style>` no longer shifts the anchors of every later heading: the injector skips them, as the extractor does. The scan walks tag by tag, so an unclosed `<script>`/`<style>`/comment swallows the rest as libxml does, and a `<!--` or `<script>` inside an attribute value starts nothing. A blank `id` (`id=""`, `id=" "`, bare `id`) is replaced instead of duplicated, ids are read as attributes (`title="my id=foo"` is no id), and a heading/anchor count mismatch is logged as a warning.
+- A regex `exclude` that cannot run (PCRE error) is logged as a warning instead of silently doing nothing.
 - A PCRE failure during id injection is logged as a warning, and the rendered HTML is returned unchanged instead of failing silently.
 
 ## 2026-08-09 v2.2.0

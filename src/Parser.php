@@ -9,6 +9,7 @@ namespace Goldnead\StatamicToc;
 
 use Goldnead\StatamicToc\Anchors\IdInjector;
 use Goldnead\StatamicToc\Extractors\Detector;
+use Illuminate\Support\Facades\Log;
 
 class Parser
 {
@@ -63,7 +64,6 @@ class Parser
     public function make($content)
     {
         $this->headings = [];
-        $this->options = Options::default();
         $this->content = $content;
 
         return $this;
@@ -318,7 +318,21 @@ class Parser
         // This avoids calling preg_match on plain strings, which would emit warnings.
         if (preg_match('/^([^\w\s\\\\])[^\1]*\1[gimsuy]*$/', $this->options->exclude)) {
             try {
-                return ! preg_match($this->withUnicodeFlag($this->options->exclude), $title);
+                $matched = preg_match($this->withUnicodeFlag($this->options->exclude), $title);
+
+                // false is a PCRE error (invalid UTF-8, bad pattern): the
+                // heading stays listed, but the rule did not run, and saying
+                // so beats a silent no-op.
+                if ($matched === false) {
+                    Log::warning('statamic-toc: exclude pattern could not be applied', [
+                        'pattern' => $this->options->exclude,
+                        'error' => preg_last_error_msg(),
+                    ]);
+
+                    return true;
+                }
+
+                return ! $matched;
             } catch (\Throwable $e) {
                 // Invalid regex — fall through to string match
             }
