@@ -2,6 +2,8 @@
 
 namespace Goldnead\StatamicToc\Anchors;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Writes the anchors into the rendered HTML.
  *
@@ -23,11 +25,18 @@ class IdInjector
     {
         $index = 0;
 
-        return preg_replace_callback(
-            '/<(h[1-6])((?:"[^"]*"|\'[^\']*\'|[^>"\'])*)>/i',
+        $result = preg_replace_callback(
+            // Comments, script and style come first and are passed over: the
+            // extractor (DOM) sees no headings in them, so counting one here
+            // would hand every later heading its neighbour's anchor.
+            '/<!--.*?-->|<(script|style)\b.*?<\/\1\s*>|<(h[1-6])((?:"[^"]*"|\'[^\']*\'|[^>"\'])*)>/is',
             function ($matches) use ($anchors, $attributes, &$index) {
-                $tag = $matches[1];
-                $attrs = $matches[2];
+                if (! isset($matches[3])) {
+                    return $matches[0];
+                }
+
+                $tag = $matches[2];
+                $attrs = $matches[3];
                 $anchor = $anchors[$index] ?? null;
                 $index++;
 
@@ -41,14 +50,49 @@ class IdInjector
 
                 $extra = $attributes ? ' '.str_replace('[id]', $anchor, $attributes) : '';
 
+                // An empty id="" is no id (see hasId()); drop it so the heading
+                // does not end up with two.
+                $attrs = preg_replace('/\s+(?<![\w-])id\s*=\s*(?:""|\'\')/i', '', $attrs) ?? $attrs;
+
                 return sprintf('<%s%s id="%s"%s>', $tag, rtrim($attrs), $anchor, $extra);
             },
             $html
-        ) ?? $html;
+        );
+
+        if ($result === null) {
+            return $this->injectionFailed($html);
+        }
+
+        // Anchors are aligned by index with the headings. A different count
+        // means the extractor and this scan disagree about the markup, and
+        // every heading after the first difference carries someone else's id.
+        if ($index !== count($anchors)) {
+            Log::warning('statamic-toc: heading count differs from anchor count', [
+                'headings' => $index,
+                'anchors' => count($anchors),
+            ]);
+        }
+
+        return $result;
+    }
+
+    /**
+     * A PCRE error (backtrack limit, bad UTF-8) makes preg_replace_callback
+     * return null. Log it instead of failing silently, and serve the page as
+     * rendered: without anchors, but intact.
+     */
+    private function injectionFailed(string $html): string
+    {
+        Log::warning('statamic-toc: id injection failed', ['error' => preg_last_error_msg()]);
+
+        return $html;
     }
 
     private function hasId(string $attributes): bool
     {
-        return preg_match('/\bid\s*=\s*(["\']).*?\1/i', $attributes) === 1;
+        // Only a real id attribute with a non-empty value counts, the same rule
+        // HtmlExtractor applies to explicit ids. `data-id`, `hx-id` and `id=""`
+        // are not ids.
+        return preg_match('/(?<![\w-])id\s*=\s*("[^"]+"|\'[^\']+\'|[^\s>"\']+)/i', $attributes) === 1;
     }
 }

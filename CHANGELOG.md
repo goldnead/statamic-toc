@@ -17,6 +17,14 @@ läuft weiter auch auf Statamic 5. Ohne den Nachbarn meldet sich nichts an, und 
 es war. Wer den Bildschirm will, installiert ihn dazu:
 `composer require goldnead/statamic-brand-context`.
 
+### Fixed
+
+- Headings carrying a `data-id`, `data-heading-id` or `hx-id` attribute get an anchor again. Only a real `id` attribute with a non-empty value counts as an existing id.
+- `exclude` matches umlaut titles case-insensitively, so `exclude="über"` hits "Über uns". Regex excludes get the `u` modifier unless they already have it.
+- Calling `build()` twice on the same parser instance no longer doubles the list, and `make()` resets the options to their defaults.
+- A heading inside an HTML comment, `<script>` (JSON-LD) or `<style>` no longer shifts the anchors of every later heading: the injector skips them, as the extractor does. An empty `id=""` is replaced instead of duplicated, and a heading/anchor count mismatch is logged as a warning.
+- A PCRE failure during id injection is logged as a warning, and the rendered HTML is returned unchanged instead of failing silently.
+
 ## 2026-08-09 v2.2.0
 
 Housekeeping release. **Nothing that ships changed**: no file under `src/`, `config/` or

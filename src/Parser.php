@@ -63,6 +63,7 @@ class Parser
     public function make($content)
     {
         $this->headings = [];
+        $this->options = Options::default();
         $this->content = $content;
 
         return $this;
@@ -173,6 +174,10 @@ class Parser
      */
     public function build(): array
     {
+        // Each run starts from an empty list, otherwise a second build() on the
+        // same instance appends to the first one's headings.
+        $this->headings = [];
+
         return $this->supplementExtraOutput(
             $this->generate()
         );
@@ -313,7 +318,7 @@ class Parser
         // This avoids calling preg_match on plain strings, which would emit warnings.
         if (preg_match('/^([^\w\s\\\\])[^\1]*\1[gimsuy]*$/', $this->options->exclude)) {
             try {
-                return ! preg_match($this->options->exclude, $title);
+                return ! preg_match($this->withUnicodeFlag($this->options->exclude), $title);
             } catch (\Throwable $e) {
                 // Invalid regex — fall through to string match
             }
@@ -322,12 +327,23 @@ class Parser
         // Comma-separated string match; skip empty tokens to avoid matching everything
         foreach (explode(',', $this->options->exclude) as $exc) {
             $exc = trim($exc);
-            if ($exc !== '' && stripos($title, $exc) !== false) {
+            if ($exc !== '' && mb_stripos($title, $exc, 0, 'UTF-8') !== false) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * Adds the u modifier to a delimited pattern unless it is already there, so
+     * multibyte titles are matched by character, not by byte.
+     */
+    private function withUnicodeFlag(string $pattern): string
+    {
+        $flags = substr($pattern, strrpos($pattern, $pattern[0]) + 1);
+
+        return str_contains($flags, 'u') ? $pattern : $pattern.'u';
     }
 
     /**
