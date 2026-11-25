@@ -39,7 +39,9 @@ class ServiceProvider extends AddonServiceProvider
 
         // One registry per request, so the tag and the modifier land on the
         // same anchors for the same document.
-        $this->app->singleton(Registry::class);
+        // Scoped, not a singleton: under Octane or a queue worker the cache
+        // would otherwise outlive the request and only ever grow.
+        $this->app->scoped(Registry::class);
 
         $this->mergeConfigFrom(__DIR__.'/../config/statamic-toc.php', 'statamic-toc');
     }

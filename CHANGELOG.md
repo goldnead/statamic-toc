@@ -26,6 +26,7 @@ es war. Wer den Bildschirm will, installiert ihn dazu:
 - An explicit anchor id with quotes or `&` is escaped when written into the heading tag.
 - A regex `exclude` that cannot run (PCRE error) is logged as a warning instead of silently doing nothing.
 - A PCRE failure during id injection is logged as a warning, and the rendered HTML is returned unchanged instead of failing silently.
+- The anchor registry is request-scoped instead of a singleton, so under Octane or a queue worker its cache no longer outlives the request and grows without bound.
 
 ## 2026-08-09 v2.2.0
 
