@@ -215,6 +215,14 @@ class AnchorsTest extends AddonTestCase
         }
     }
 
+    public function test_an_anchor_with_quotes_cannot_break_out_of_the_attribute()
+    {
+        $this->assertSame(
+            '<h2 id="a&quot; onclick=&quot;x">T</h2>',
+            (new IdInjector)->inject('<h2>T</h2>', ['a" onclick="x'])
+        );
+    }
+
     public function test_a_count_mismatch_between_headings_and_anchors_is_logged()
     {
         Log::spy();

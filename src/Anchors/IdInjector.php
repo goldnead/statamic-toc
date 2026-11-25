@@ -68,7 +68,8 @@ class IdInjector
 
                 $extra = $attributes ? ' '.str_replace('[id]', $anchor, $attributes) : '';
 
-                return sprintf('<%s%s id="%s"%s>', $tag, rtrim($attrs), $anchor, $extra);
+                // An explicit Bard id can carry any character; it must not break out of the attribute.
+                return sprintf('<%s%s id="%s"%s>', $tag, rtrim($attrs), htmlspecialchars($anchor, ENT_QUOTES), $extra);
             },
             $html
         );
