@@ -9,6 +9,7 @@ namespace Goldnead\StatamicToc;
 
 use Goldnead\StatamicToc\Anchors\IdInjector;
 use Goldnead\StatamicToc\Extractors\Detector;
+use Illuminate\Support\Facades\Log;
 
 class Parser
 {
@@ -173,6 +174,10 @@ class Parser
      */
     public function build(): array
     {
+        // Each run starts from an empty list, otherwise a second build() on the
+        // same instance appends to the first one's headings.
+        $this->headings = [];
+
         return $this->supplementExtraOutput(
             $this->generate()
         );
@@ -313,7 +318,21 @@ class Parser
         // This avoids calling preg_match on plain strings, which would emit warnings.
         if (preg_match('/^([^\w\s\\\\])[^\1]*\1[gimsuy]*$/', $this->options->exclude)) {
             try {
-                return ! preg_match($this->options->exclude, $title);
+                $matched = preg_match($this->withUnicodeFlag($this->options->exclude), $title);
+
+                // false is a PCRE error (invalid UTF-8, bad pattern): the
+                // heading stays listed, but the rule did not run, and saying
+                // so beats a silent no-op.
+                if ($matched === false) {
+                    Log::warning('statamic-toc: exclude pattern could not be applied', [
+                        'pattern' => $this->options->exclude,
+                        'error' => preg_last_error_msg(),
+                    ]);
+
+                    return true;
+                }
+
+                return ! $matched;
             } catch (\Throwable $e) {
                 // Invalid regex — fall through to string match
             }
@@ -322,12 +341,23 @@ class Parser
         // Comma-separated string match; skip empty tokens to avoid matching everything
         foreach (explode(',', $this->options->exclude) as $exc) {
             $exc = trim($exc);
-            if ($exc !== '' && stripos($title, $exc) !== false) {
+            if ($exc !== '' && mb_stripos($title, $exc, 0, 'UTF-8') !== false) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * Adds the u modifier to a delimited pattern unless it is already there, so
+     * multibyte titles are matched by character, not by byte.
+     */
+    private function withUnicodeFlag(string $pattern): string
+    {
+        $flags = substr($pattern, strrpos($pattern, $pattern[0]) + 1);
+
+        return str_contains($flags, 'u') ? $pattern : $pattern.'u';
     }
 
     /**

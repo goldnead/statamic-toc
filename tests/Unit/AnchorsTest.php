@@ -9,6 +9,8 @@ use Goldnead\StatamicToc\Extractors\HtmlExtractor;
 use Goldnead\StatamicToc\Heading;
 use Goldnead\StatamicToc\Registry;
 use Goldnead\StatamicToc\ServiceProvider;
+use Illuminate\Support\Facades\Log;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Statamic\Testing\AddonTestCase;
 
 class AnchorsTest extends AddonTestCase
@@ -98,6 +100,28 @@ class AnchorsTest extends AddonTestCase
         }
     }
 
+    public function test_a_data_attribute_ending_in_id_is_not_an_id()
+    {
+        // data-id, data-heading-id and hx-id contain "id=" but are not the id
+        // attribute, so the heading still needs one.
+        $cases = [
+            '<h2 data-id="x">Titel</h2>' => '<h2 data-id="x" id="titel">Titel</h2>',
+            '<h2 data-heading-id="x">Titel</h2>' => '<h2 data-heading-id="x" id="titel">Titel</h2>',
+            '<h2 hx-id="x">Titel</h2>' => '<h2 hx-id="x" id="titel">Titel</h2>',
+        ];
+
+        foreach ($cases as $html => $expected) {
+            $this->assertSame($expected, (new IdInjector)->inject($html, ['titel']), $html);
+        }
+    }
+
+    public function test_an_explicit_id_is_kept_when_other_attributes_mention_id()
+    {
+        $html = '<h2 data-id="x" id="mein-anker">Titel</h2>';
+
+        $this->assertSame($html, (new IdInjector)->inject($html, ['titel']));
+    }
+
     public function test_keeps_the_rest_of_the_markup_byte_for_byte()
     {
         $html = '<h2 class="mt-4" data-x="a>b">Titel</h2><p>Text mit <em>Betonung</em> &amp; Zeichen.</p><br>';
@@ -115,9 +139,124 @@ class AnchorsTest extends AddonTestCase
         $this->assertSame('<h2 id="titel" x-on:click="go(\'titel\')">Titel</h2>', $out);
     }
 
+    public function test_an_empty_id_is_replaced_not_duplicated()
+    {
+        $this->assertSame(
+            '<h2 id="titel">Titel</h2>',
+            (new IdInjector)->inject('<h2 id="">Titel</h2>', ['titel'])
+        );
+    }
+
+    public function test_a_heading_inside_a_comment_or_script_does_not_shift_the_anchors()
+    {
+        // The extractor sees neither: a comment and the JSON-LD in a script are
+        // no headings. Counting them in the injector gave every heading after
+        // them the anchor of its neighbour.
+        $html = '<!-- <h2>Alt</h2> --><script type="application/ld+json">{"x":"<h2>Nein</h2>"}</script>'
+            .'<style>/* <h3>x</h3> */</style><h2>Eins</h2><h2>Zwei</h2>';
+
+        $out = (new IdInjector)->inject($html, ['eins', 'zwei']);
+
+        $this->assertStringContainsString('<h2 id="eins">Eins</h2>', $out);
+        $this->assertStringContainsString('<h2 id="zwei">Zwei</h2>', $out);
+        $this->assertStringContainsString('<!-- <h2>Alt</h2> -->', $out);
+        $this->assertStringContainsString('{"x":"<h2>Nein</h2>"}', $out);
+
+        // And the extractor agrees on the count, which is the whole contract.
+        $this->assertCount(2, (new HtmlExtractor)->extract($html));
+    }
+
+    /**
+     * The scan has to count what libxml counts. Every case here was measured
+     * against HtmlExtractor, which is the other half of the contract.
+     *
+     * @return array<string, array{string, int}>
+     */
+    public static function documents(): array
+    {
+        return [
+            'unclosed script swallows the rest' => ['<script>x<h2>A</h2><h2>B</h2>', 0],
+            'unclosed style swallows the rest' => ['<style>x{}<h2>A</h2><h2>B</h2>', 0],
+            'unclosed comment swallows the rest' => ['<!-- <h2>A</h2><h2>B</h2>', 0],
+            'comment marker in an attribute starts nothing' => ['<a title="<!--"><h2>A</h2></a><h2>B</h2> -->', 2],
+            'script in an attribute starts nothing' => ['<a title="<script>"><h2>A</h2></a><h2>B</h2><script>1</script>', 2],
+            'custom element named like script' => ['<script-x></script-x><h2>A</h2><h2>B</h2>', 2],
+            'uppercase closing tag' => ['<SCRIPT>x</SCRIPT><h2>A</h2>', 1],
+            'heading after closed script' => ['<script>"<h2>x</h2>"</script><h2>A</h2>', 1],
+        ];
+    }
+
+    #[DataProvider('documents')]
+    public function test_the_injector_counts_the_same_headings_as_the_extractor(string $html, int $expected)
+    {
+        $this->assertCount($expected, (new HtmlExtractor)->extract($html), 'extractor');
+
+        $anchors = array_map(fn ($i) => 'a'.$i, range(1, $expected));
+        $out = (new IdInjector)->inject($html, $anchors);
+
+        $this->assertSame($expected, substr_count($out, ' id="a'), 'injector: '.$out);
+    }
+
+    public function test_only_a_real_non_blank_id_attribute_counts()
+    {
+        $cases = [
+            '<h2 id=" ">T</h2>' => '<h2 id="t">T</h2>',
+            '<h2 id>T</h2>' => '<h2 id="t">T</h2>',
+            '<h2 id=>T</h2>' => '<h2 id="t">T</h2>',
+            '<h2 class="a"id="">T</h2>' => '<h2 class="a" id="t">T</h2>',
+            '<h2 title="my id=foo">T</h2>' => '<h2 title="my id=foo" id="t">T</h2>',
+            '<h2 title="a id=\'\'">T</h2>' => '<h2 title="a id=\'\'" id="t">T</h2>',
+            '<h2 ID="Mein">T</h2>' => '<h2 ID="Mein">T</h2>',
+            '<h2 id=mein>T</h2>' => '<h2 id=mein>T</h2>',
+        ];
+
+        foreach ($cases as $html => $expected) {
+            $this->assertSame($expected, (new IdInjector)->inject($html, ['t']), $html);
+        }
+    }
+
+    public function test_an_anchor_with_quotes_cannot_break_out_of_the_attribute()
+    {
+        $this->assertSame(
+            '<h2 id="a&quot; onclick=&quot;x">T</h2>',
+            (new IdInjector)->inject('<h2>T</h2>', ['a" onclick="x'])
+        );
+    }
+
+    public function test_a_count_mismatch_between_headings_and_anchors_is_logged()
+    {
+        Log::spy();
+
+        (new IdInjector)->inject('<h2>Eins</h2><h2>Zwei</h2>', ['eins']);
+
+        Log::shouldHaveReceived('warning')
+            ->with('statamic-toc: heading count differs from anchor count', \Mockery::type('array'))
+            ->once();
+    }
+
     public function test_a_heading_without_an_anchor_is_left_alone()
     {
         $this->assertSame('<h2></h2>', (new IdInjector)->inject('<h2></h2>', [null]));
+    }
+
+    public function test_a_pcre_failure_is_logged_and_the_html_comes_back_unchanged()
+    {
+        Log::spy();
+
+        // A long run of quoted values inside one tag exhausts the PCRE JIT
+        // stack, so preg_replace_callback returns null. Changing pcre.jit or
+        // pcre.backtrack_limit at runtime does not reliably trigger it, because
+        // the compiled pattern is cached per process.
+        $html = '<h2 class="'.str_repeat('"a" ', 100000).'">Titel</h2>';
+
+        $out = (new IdInjector)->inject($html, ['titel']);
+
+        $this->assertSame($html, $out);
+        Log::shouldHaveReceived('warning')
+            ->with('statamic-toc: id injection failed', \Mockery::on(
+                fn ($context) => isset($context['error']) && $context['error'] !== ''
+            ))
+            ->once();
     }
 
     // ----------------------------------------------------------------- Shared

@@ -4,6 +4,7 @@ namespace Goldnead\StatamicToc\Tests\Unit;
 
 use Goldnead\StatamicToc\Parser;
 use Goldnead\StatamicToc\ServiceProvider;
+use Illuminate\Support\Facades\Log;
 use Statamic\Testing\AddonTestCase;
 
 class ParserSafetyTest extends AddonTestCase
@@ -188,5 +189,60 @@ class ParserSafetyTest extends AddonTestCase
 
         $this->assertEquals(count($once), count($twice));
         $this->assertEquals(count($once[0]['children']), count($twice[0]['children']));
+    }
+
+    public function test_plain_exclude_matches_umlaut_titles_case_insensitively()
+    {
+        $html = '<h2>Über uns</h2><h2>Atem</h2>';
+
+        $result = (new Parser($html))->exclude('über')->flatten()->build();
+
+        $this->assertSame(['Atem'], array_column($result, 'toc_title'));
+    }
+
+    public function test_regex_exclude_matches_umlaut_titles_case_insensitively()
+    {
+        // Without the /u modifier PCRE compares bytes, so the capital Ü never
+        // matches the lowercase ü in the pattern.
+        $html = '<h2>Über uns</h2><h2>Atem</h2>';
+
+        $result = (new Parser($html))->exclude('/über/i')->flatten()->build();
+
+        $this->assertSame(['Atem'], array_column($result, 'toc_title'));
+    }
+
+    public function test_building_the_same_instance_twice_gives_the_same_result()
+    {
+        $html = '<h2>A</h2><h3>B</h3><h2>C</h2>';
+
+        $parser = (new Parser($html))->depth(6);
+        $first = $parser->build();
+        $second = $parser->build();
+
+        $this->assertSame($first, $second);
+        $this->assertSame(3, $second[0]['total_results']);
+    }
+
+    public function test_a_regex_exclude_that_cannot_run_is_logged_not_swallowed()
+    {
+        Log::spy();
+
+        // Catastrophic backtracking ends in a PCRE error: preg_match returns false.
+        $jit = ini_get('pcre.jit');
+        $limit = ini_get('pcre.backtrack_limit');
+        ini_set('pcre.jit', '0');
+        ini_set('pcre.backtrack_limit', '50');
+        $this->beforeApplicationDestroyed(function () use ($jit, $limit) {
+            ini_set('pcre.jit', $jit);
+            ini_set('pcre.backtrack_limit', $limit);
+        });
+
+        $parser = (new Parser)->exclude('/(a+)+$/');
+        $parser->make('<h2>'.str_repeat('a', 40).'b</h2>');
+        $parser->build();
+
+        Log::shouldHaveReceived('warning')
+            ->with('statamic-toc: exclude pattern could not be applied', \Mockery::type('array'))
+            ->once();
     }
 }
